@@ -1,0 +1,244 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Seat Selection</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords"
+        content="Movie Ticket Booking Widget Responsive, Login form web template, Sign up Web Templates, Flat Web Templates, Login signup Responsive web template, Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, SonyEricsson, Motorola web design" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/seat_selection/style.css' %}">
+    <style>
+        .confirm-btn { display: none; }
+        /* Define base styles for seat types here if needed */
+        /* Example: */
+        /* .seat-type-1 { background-color: lightblue; } */
+        /* .seat-type-2 { background-color: lightgreen; } */
+    </style>
+</head>
+<body>
+    <div class="content"
+         data-seats='{{ seats_json|safe }}' 
+         data-reserved-seats='{{ reserved_seats_json|safe }}' 
+         data-seat-types='{{ seat_types_json|safe }}' 
+         data-ticket-price='{{ showtime.price|default:0 }}'>
+        <div class="main">
+            <div class="main-content">
+                <div class="seat-booking">
+                    <div class="screen">SCREEN</div>
+                    <div class="seat-grid" id="seat-grid">
+                        <!-- Seat grid will be generated dynamically -->
+                    </div>
+                </div>
+
+                <div class="summary">
+                    <p>Movie: {{ showtime.movie.title }}</p>
+                    <p>Time: {{ showtime.show_date }} {{ showtime.start_time }}</p>
+                    <p id="ticket-count">Tickets: 0</p>
+                    <p id="total-cost">Total: Rs.0</p>
+                    <p>Selected Seats:</p>
+                    <div class="selected-seats" id="selected-seats">
+                        <!-- Selected seats will be displayed here -->
+                    </div>
+                    <button class="confirm-btn" id="confirm-btn">Confirm Booking</button>
+                    <div class="legend">
+                        <div class="seat available">Ghế trống</div>
+                        <div class="seat sold">Đã bán</div>
+                        <div class="seat selected">Đã chọn</div>
+                        <!-- {% if seat_types %} 
+                            {% for type in seat_types %} 
+                                <div class="seat seat-type-{{ type.id }}">{% if type.name == "Standard" %}Ghế thường{% else %}{{ type.name }}{% endif %}</div>
+                            {% endfor %}
+                        {% endif %} -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Initialize data from data attributes
+            const contentElement = document.querySelector('.content');
+            const TICKET_PRICE = parseFloat(contentElement.dataset.ticketPrice);
+            const MAX_SEATS = 10;
+            const rowLabels = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
+            const seatGrid = document.getElementById('seat-grid');
+            const selectedSeatsContainer = document.getElementById('selected-seats');
+            const ticketCountElement = document.getElementById('ticket-count');
+            const totalCostElement = document.getElementById('total-cost');
+            let selectedSeats = [];
+
+            // Parse data from attributes
+            let seatsData = [];
+            let seatTypesData = {};
+            let reservedSeats = [];
+
+            try {
+                seatsData = JSON.parse(contentElement.dataset.seats);
+                reservedSeats = JSON.parse(contentElement.dataset.reservedSeats);
+                const rawSeatTypes = JSON.parse(contentElement.dataset.seatTypes);
+
+                // Process seat types first
+                rawSeatTypes.forEach(type => {
+                    seatTypesData[type.pk] = { 
+                        name: type.fields.name,
+                        price_multiplier: parseFloat(type.fields.price_multiplier) || 1.0
+                    };
+                });
+
+                // Process seats data - map to simpler structure
+                seatsData = seatsData.map(seat => {
+                    const typeId = seat.fields.seat_type;
+                    const seatType = seatTypesData[typeId] || { price_multiplier: 1.0 }; 
+                    return {
+                        id: seat.pk,
+                        row: seat.fields.row,
+                        column: seat.fields.column,
+                        typeId: typeId,
+                        is_active: seat.fields.is_active,
+                        priceMultiplier: seatType.price_multiplier
+                    };
+                });
+
+            } catch (e) {
+                console.error("Error parsing seat data:", e);
+                seatGrid.innerHTML = '<p>Error loading seat data. Please try again.</p>';
+            }
+
+            function rowNumberToLetter(row) {
+                if (typeof row !== 'number' || row < 1 || row > 26) return '?';
+                return rowLabels[row - 1];
+            }
+
+            function generateSeatGrid() {
+                seatGrid.innerHTML = '';
+                if (!seatsData || seatsData.length === 0) {
+                    // Check if there was a parsing error before showing "No data"
+                    if (!seatGrid.querySelector('p')) {
+                         seatGrid.innerHTML = '<p>No seat data available.</p>';
+                    }
+                    return;
+                } 
+                
+                const maxRow = Math.max(0, ...seatsData.map(seat => seat.row));
+                // Force 10 columns for rendering consistency
+                const maxCol = 10;
+
+                for (let row = 1; row <= maxRow; row++) {
+                    for (let col = 1; col <= maxCol; col++) {
+                        const seatElement = document.createElement('div');
+                        seatElement.classList.add('seat');
+                        const seatData = seatsData.find(s => s.row === row && s.column === col);
+                        
+                        if (seatData) {
+                            seatElement.dataset.id = seatData.id;
+                            seatElement.dataset.row = row;
+                            seatElement.dataset.col = col;
+                            seatElement.dataset.type = seatData.typeId;
+                            seatElement.dataset.priceMultiplier = seatData.priceMultiplier;
+                            seatElement.textContent = `${rowNumberToLetter(row)}${col}`;
+
+                            if (!seatData.is_active) {
+                                seatElement.classList.add('inactive');
+                            } else if (reservedSeats.includes(seatData.id)) {
+                                seatElement.classList.add('sold');
+                            } else if (selectedSeats.some(s => s.id === seatData.id)) {
+                                seatElement.classList.add('selected');
+                            } else {
+                                seatElement.classList.add('available');
+                                if (seatData.typeId) { 
+                                   seatElement.classList.add(`seat-type-${seatData.typeId}`);
+                                }
+                            }
+                            if (seatData.is_active && !reservedSeats.includes(seatData.id)) {
+                                seatElement.addEventListener('click', () => toggleSeat(seatElement));
+                            }
+                        } else {
+                            seatElement.classList.add('empty'); 
+                        }
+                        seatGrid.appendChild(seatElement);
+                    }
+                }
+            }
+
+            function updateSummary() {
+                selectedSeatsContainer.innerHTML = selectedSeats.map(seat => 
+                    `<span>${rowNumberToLetter(seat.row)}${seat.col}</span>`
+                ).join(' ');
+                const ticketCount = selectedSeats.length;
+                ticketCountElement.textContent = `Tickets: ${ticketCount}`;
+                
+                const totalCost = selectedSeats.reduce((sum, seat) => {
+                    const multiplier = typeof seat.priceMultiplier === 'number' ? seat.priceMultiplier : 1.0;
+                    return sum + (TICKET_PRICE * multiplier);
+                 }, 0);
+                totalCostElement.textContent = `Total: ${totalCost.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`;
+
+                // Send update to parent window
+                if (window.parent) {
+                    try {
+                        window.parent.postMessage({ 
+                            type: 'seatsUpdated', 
+                            seats: getSelectedSeats(),
+                            price: totalCost
+                        }, '*');
+                    } catch (e) {
+                        console.error("Error posting message to parent: ", e);
+                    }
+                }
+            }
+            
+            window.getSelectedSeats = function() {
+                return selectedSeats.map(seat => seat.id);
+            }
+
+            function toggleSeat(seatElement) {
+                if (seatElement.classList.contains('sold') || seatElement.classList.contains('inactive')) {
+                    return;
+                }
+
+                const seatId = parseInt(seatElement.dataset.id);
+                const seatIndex = selectedSeats.findIndex(s => s.id === seatId);
+                let selectionChanged = false; 
+
+                if (seatIndex !== -1) {
+                    selectedSeats.splice(seatIndex, 1);
+                    seatElement.classList.remove('selected');
+                    seatElement.classList.add('available');
+                    if(seatElement.dataset.type) {
+                        seatElement.classList.add(`seat-type-${seatElement.dataset.type}`);
+                    }
+                    selectionChanged = true;
+                } else {
+                    if (selectedSeats.length >= MAX_SEATS) {
+                        alert(`You can only select up to ${MAX_SEATS} seats.`);
+                        return;
+                    }
+                    const seatData = seatsData.find(s => s.id === seatId);
+                    if (seatData) {
+                        selectedSeats.push({
+                            id: seatId,
+                            row: parseInt(seatElement.dataset.row),
+                            col: parseInt(seatElement.dataset.col),
+                            typeId: seatData.typeId,
+                            priceMultiplier: parseFloat(seatElement.dataset.priceMultiplier) || 1.0 
+                        });
+                        seatElement.classList.remove('available');
+                        if(seatElement.dataset.type) {
+                             seatElement.classList.remove(`seat-type-${seatElement.dataset.type}`);
+                        }
+                        seatElement.classList.add('selected');
+                        selectionChanged = true;
+                    }
+                }
+                
+                updateSummary();
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                generateSeatGrid();
+                updateSummary();
+            });
+        </script>
+    </div>
+</body>
+</html>

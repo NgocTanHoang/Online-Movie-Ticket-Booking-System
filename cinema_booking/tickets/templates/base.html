@@ -1,0 +1,570 @@
+{% load static %}
+<!doctype html>
+<html lang="zxx">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %}FimTikit{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style-starter.css' %}">
+    <link href="//fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,600&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- Owl Carousel CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        /* Tăng kích thước popup cho tất cả small-dialog */
+        .zoom-anim-dialog {
+            max-width: 1200px;
+            margin: 10px auto;
+            position: relative;
+        }
+
+        /* Tăng kích thước iframe bên trong */
+        .zoom-anim-dialog iframe {
+            width: 100%;
+            height: 700px;
+            display: block;
+            border-radius: 10px;
+        }
+
+        .w3l-mid-slider .mid-view {
+            filter: brightness(1.2) !important;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+
+        .w3l-mid-slider .mid-view::before {
+            background: rgba(9, 6, 20, 0.3) !important;
+        }
+
+        .selected-theater {
+            margin-left: 15px;
+            border-left: 1px solid rgba(255,255,255,0.1);
+            padding-left: 15px;
+            min-width: 200px;
+            max-width: none;
+        }
+        .selected-theater a {
+            color: #000;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: normal;
+            overflow: visible;
+            text-overflow: clip;
+        }
+        .selected-theater a:hover {
+            color: #ff4e8c;
+        }
+        .selected-theater .fa-map-marker {
+            font-size: 1.2em;
+            color: #000;
+            flex-shrink: 0;
+        }
+        .selected-theater .fa-chevron-down {
+            font-size: 0.8em;
+            margin-left: 5px;
+            color: #000;
+            flex-shrink: 0;
+        }
+        .selected-theater-name {
+            overflow: visible;
+            text-overflow: clip;
+            white-space: normal;
+            flex-grow: 1;
+            line-height: 1.2;
+        }
+
+        /* Styles for theater selection modal */
+        #theaterModal .modal-title,
+        #theaterModal .form-group label,
+        #theaterModal .form-control,
+        #theaterModal .btn-primary {
+            color: #000;
+        }
+
+        #theaterModal .modal-header {
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        #theaterModal .modal-footer {
+            border-top: 1px solid #dee2e6;
+        }
+
+        #theaterModal .close {
+            color: #000;
+            opacity: 0.5;
+        }
+
+        #theaterModal .close:hover {
+            opacity: 0.75;
+        }
+
+        /* Fix theater dropdown styles */
+        #theaterModal select.form-control {
+            white-space: normal;
+            height: auto;
+            min-width: 100%;
+        }
+
+        #theaterModal select.form-control option {
+            white-space: normal;
+            padding: 8px 12px;
+            min-height: 30px;
+            display: block;
+            width: 100%;
+            text-overflow: unset;
+            overflow: visible;
+        }
+
+        #theaterModal .form-group {
+            margin-bottom: 1rem;
+        }
+
+        #theater option {
+            white-space: normal !important;
+            overflow: visible !important;
+            text-overflow: unset !important;
+            width: 100% !important;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- header -->
+    <header id="site-header" class="w3l-header fixed-top">
+        <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
+            <div class="container">
+                <h1>
+                    <a class="navbar-brand" href="{% url 'home' %}">
+                        <span class="fas fa-film icon-log" aria-hidden="true"></span>
+                        FimTikit
+                    </a>
+                </h1>
+                {% if not user.is_staff and not request.resolver_match.url_name|slice:":5" == "admin" %}
+                <div class="selected-theater">
+                    <a href="#" class="nav-link" id="changeTheater">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span class="selected-theater-name">
+                        {% if selected_theater %}
+                            {{ selected_theater.name }}
+                        {% else %}
+                            Chọn rạp chiếu
+                        {% endif %}
+                        </span>
+                        <i class="fas fa-chevron-down"></i>
+                    </a>
+                </div>
+                {% endif %}
+                <button class="navbar-toggler collapsed" type="button" data-toggle="collapse"
+                    data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="fas fa-bars icon-expand"></span>
+                    <span class="fas fa-times icon-close"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'home' %}">Trang Chủ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'movies' %}">Phim</a>
+                        </li>
+                        <li class="nav-item">
+                            {% if selected_theater %}
+                                <a class="nav-link" href="{% url 'theater_info' theater_id=selected_theater.id %}">Giới Thiệu Rạp</a>
+                            {% else %}
+                                <a class="nav-link" href="{% url 'theater_info' %}">Giới Thiệu Rạp</a>
+                            {% endif %}
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Liên Hệ</a>
+                        </li>
+                        {% if user.is_authenticated and user.is_staff %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Quản lí
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="adminDropdown">
+                                <a class="dropdown-item" href="{% url 'admin_dashboard' %}">
+                                    <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                                </a>
+                                <a class="dropdown-item" href="{% url 'admin_movies' %}">
+                                    <i class="fas fa-film mr-2"></i>Quản lý phim
+                                </a>
+                                <a class="dropdown-item" href="{% url 'admin_theaters' %}">
+                                    <i class="fas fa-building mr-2"></i>Quản lý rạp
+                                </a>
+                                <a class="dropdown-item" href="{% url 'admin_users' %}">
+                                    <i class="fas fa-users mr-2"></i>Quản lý người dùng
+                                </a>
+                                <a class="dropdown-item" href="{% url 'admin_promotions' %}">
+                                    <i class="fas fa-percent mr-2"></i>Khuyến mãi
+                                </a>
+                                <a class="dropdown-item" href="{% url 'admin_reports' %}">
+                                    <i class="fas fa-chart-bar mr-2"></i>Báo cáo
+                                </a>
+                                <a class="dropdown-item" href="{% url 'admin_content' %}">
+                                    <i class="fas fa-edit mr-2"></i>Nội dung
+                                </a>
+                                <a class="dropdown-item" href="{% url 'manage_showtimes' %}">
+                                    <i class="fas fa-clock mr-2"></i>Lịch chiếu
+                                </a>
+                            </div>
+                        </li>
+                        {% endif %}
+                    </ul>
+
+                    <div class="search-right">
+                        <a href="#search" class="btn search-hny mr-lg-3 mt-lg-0 mt-4" title="Tìm kiếm">
+                            Tìm kiếm
+                            <span class="fas fa-search ml-3" aria-hidden="true"></span>
+                        </a>
+                        <div id="search" class="pop-overlay">
+                            <div class="popup">
+                                <form action="#" method="post" class="search-box">
+                                    <input type="search" placeholder="Nhập từ khóa tìm kiếm" name="search"
+                                        required="required" autofocus="">
+                                    <button type="submit" class="btn">
+                                        <span class="fas fa-search" aria-hidden="true"></span>
+                                    </button>
+                                </form>
+                            </div>
+                            <a class="close" href="#close">×</a>
+                        </div>
+                    </div>
+
+                    <div class="Login_SignUp" id="login">
+                        {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Tài khoản">
+                                <i class="fas fa-user-circle"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                                <div class="dropdown-item disabled">
+                                    <span>Xin chào, {{ user.first_name|default:user.username }}</span>
+                                </div>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-user mr-2"></i>Thông tin cá nhân
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{% url 'logout' %}">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>Đăng xuất
+                                </a>
+                            </div>
+                        </div>
+                        {% else %}
+                        <a class="nav-link" href="{% url 'login' %}" title="Đăng nhập">
+                            Đăng nhập
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- footer -->
+    <footer class="w3l-footer">
+        <section class="footer-inner-main">
+            <div class="footer-hny-grids py-5">
+                <div class="container py-lg-4">
+                    <div class="text-txt">
+                        <div class="right-side">
+                            <div class="row footer-about">
+                                <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
+                                    <a href="movies.html"><img class="img-fluid" src="" alt=""></a>
+                                </div>
+                                <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
+                                    <a href="movies.html"><img class="img-fluid" src="" alt=""></a>
+                                </div>
+                                <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
+                                    <a href="movies.html"><img class="img-fluid" src="" alt=""></a>
+                                </div>
+                                <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
+                                    <a href="movies.html"><img class="img-fluid" src="" alt=""></a>
+                                </div>
+                            </div>
+                            <div class="row footer-links">
+                                <div class="col-md-3 col-sm-6 sub-two-right mt-5">
+                                    <h6>Movies</h6>
+                                    <ul>
+                                        <li><a href="#">Movies</a></li>
+                                        <li><a href="#">Videos</a></li>
+                                        <li><a href="#">English Movies</a></li>
+                                        <li><a href="#">Tailor</a></li>
+                                        <li><a href="#">Upcoming Movies</a></li>
+                                        <li><a href="Contact_Us.html">Contact Us</a></li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-3 col-sm-6 sub-two-right mt-5">
+                                    <h6>Information</h6>
+                                    <ul>
+                                        <li><a href="index.html">Home</a> </li>
+                                        <li><a href="about.html">About</a> </li>
+                                        <li><a href="#">Tv Series</a> </li>
+                                        <li><a href="#">Blogs</a> </li>
+                                        <li><a href="sign_in.html">Login</a></li>
+                                        <li><a href="Contact_Us.html">Contact</a></li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-3 col-sm-6 sub-two-right mt-5">
+                                    <h6>Locations</h6>
+                                    <ul>
+                                        <li><a href="movies.html">Asia</a></li>
+                                        <li><a href="movies.html">France</a></li>
+                                        <li><a href="movies.html">Taiwan</a></li>
+                                        <li><a href="movies.html">United States</a></li>
+                                        <li><a href="movies.html">Korea</a></li>
+                                        <li><a href="movies.html">United Kingdom</a></li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-3 col-sm-6 sub-two-right mt-5">
+                                    <h6>Newsletter</h6>
+                                    <form action="#" class="subscribe mb-3" method="post">
+                                        <input type="email" name="email" placeholder="Your Email Address" required="">
+                                        <button><span class="fa fa-envelope-o"></span></button>
+                                    </form>
+                                    <p>Enter your email and receive the latest news, updates and special offers from us.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="below-section">
+                <div class="container">
+                    <div class="copyright-footer">
+                        <div class="columns text-lg-left">
+                            <p>&copy; 2025 FimTikit. All rights reserved</p>
+                        </div>
+                        <ul class="social text-lg-right">
+                            <li><a href="#facebook"><span class="fa fa-facebook" aria-hidden="true"></span></a></li>
+                            <li><a href="#linkedin"><span class="fa fa-linkedin" aria-hidden="true"></span></a></li>
+                            <li><a href="#twitter"><span class="fa fa-twitter" aria-hidden="true"></span></a></li>
+                            <li><a href="#google"><span class="fa fa-google-plus" aria-hidden="true"></span></a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <button onclick="topFunction()" id="movetop" title="Go to top">
+                <span class="fa fa-arrow-up" aria-hidden="true"></span>
+            </button>
+        </section>
+    </footer>
+
+    <!-- Theater Selection Modal -->
+    {% if not user.is_staff and request.resolver_match.url_name == 'home' %}
+    <div class="modal fade" id="theaterModal" tabindex="-1" role="dialog" aria-labelledby="theaterModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="theaterModalLabel">Chọn rạp chiếu</h5>
+                    {% if request.session.selected_theater %}
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="modal-body">
+                    <form id="theaterSelectForm" method="post" action="{% url 'select_theater' %}">
+                        {% csrf_token %}
+                        <div class="form-group mb-4">
+                            <label for="province">Tỉnh/ Thành phố:</label>
+                            <select class="form-control" id="province" name="province" required>
+                                <option value="">Chọn Tỉnh/ Thành phố</option>
+                                {% regroup theaters by get_province as province_list %}
+                                {% for province in province_list %}
+                                <option value="{{ province.grouper }}">{{ province.grouper }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="theater">Tên rạp:</label>
+                            <select class="form-control" id="theater" name="theater" required>
+                                <option value="">Chọn rạp</option>
+                                {% for theater in theaters %}
+                                <option value="{{ theater.id }}" data-province="{{ theater.get_province }}" style="display: none;">{{ theater.name|truncatechars:25 }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Xác nhận</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Scripts -->
+    <script src="{% static 'js/jquery-1.9.1.min.js'%}"></script>
+    <script src="{% static 'js/bootstrap.min.js'%}"></script>
+    <script src="{% static 'js/easyResponsiveTabs.js'%}"></script>
+    <script src="{% static 'js/theme-change.js'%}"></script>
+    <script src="{% static 'js/owl.carousel.js'%}"></script>
+    <script src="{% static 'js/jquery.magnific-popup.min.js'%}"></script>
+
+    <script>
+        // Store Django template variables in JavaScript
+        const hasSelectedTheater = "{{ request.session.selected_theater|default:'' }}" !== "";
+        const selectedTheater = "{{ request.session.selected_theater|default:'' }}";
+        const isStaff = "{{ user.is_staff }}" === "True";
+        const isHomePage = "{{ request.resolver_match.url_name }}" === "home";
+        
+        $(document).ready(function() {
+            // Show modal if no theater is selected and user is not staff and is on home page
+            if (!hasSelectedTheater && !isStaff && isHomePage) {
+                $('#theaterModal').modal('show');
+            }
+
+            // Show modal when clicking on selected theater
+            $('#changeTheater').click(function(e) {
+                e.preventDefault();
+                $('#theaterModal').modal('show');
+            });
+
+            // Province selection handler
+            $('#province').change(function() {
+                const selectedProvince = $(this).val();
+                const theaterSelect = $('#theater');
+                
+                theaterSelect.find('option').each(function() {
+                    if (!$(this).val()) {
+                        $(this).show();
+                        return;
+                    }
+                    
+                    if ($(this).data('province') === selectedProvince) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+                
+                theaterSelect.val('');
+            });
+
+            // Pre-select province and theater if already selected
+            if (hasSelectedTheater) {
+                const selectedTheaterOption = $('#theater option[value="' + selectedTheater + '"]');
+                if (selectedTheaterOption.length) {
+                    const province = selectedTheaterOption.data('province');
+                    $('#province').val(province).trigger('change');
+                    $('#theater').val(selectedTheater);
+                }
+            }
+
+            // Form submission handler
+            $('#theaterSelectForm').on('submit', function(e) {
+                e.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: $(this).attr('action'),
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        if (response.success) {
+                            $('#theaterModal').modal('hide');
+                            location.reload();
+                        }
+                    }
+                });
+            });
+
+            // Scroll to top button
+            window.onscroll = function() {
+                scrollFunction()
+            };
+
+            function scrollFunction() {
+                if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                    document.getElementById("movetop").style.display = "block";
+                } else {
+                    document.getElementById("movetop").style.display = "none";
+                }
+            }
+
+            function topFunction() {
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
+            }
+
+            // Navbar scroll effect
+            $(window).on("scroll", function() {
+                var scroll = $(window).scrollTop();
+                if (scroll >= 80) {
+                    $("#site-header").addClass("nav-fixed");
+                } else {
+                    $("#site-header").removeClass("nav-fixed");
+                }
+            });
+
+            // Mobile menu toggle
+            $(".navbar-toggler").on("click", function() {
+                $("header").toggleClass("active");
+                $("body").toggleClass("noscroll");
+            });
+
+            $(document).on("ready", function() {
+                if ($(window).width() > 991) {
+                    $("header").removeClass("active");
+                }
+                $(window).on("resize", function() {
+                    if ($(window).width() > 991) {
+                        $("header").removeClass("active");
+                    }
+                });
+            });
+        });
+    </script>
+    <script>
+        // Handle nav-link active state
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get current URL path
+            const currentPath = window.location.pathname;
+            
+            // Get all nav-links
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+            
+            // Remove active class from all nav-links
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Add active class to current nav-link
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+            
+            // Add click event listener to nav-links
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Remove active class from all nav-links
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    // Add active class to clicked nav-link
+                    this.classList.add('active');
+                });
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

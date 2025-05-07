@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard | FimTikit Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .stats-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .stats-icon.movies {
+        background: #007bff;
+        color: white;
+    }
+
+    .stats-icon.tickets {
+        background: #28a745;
+        color: white;
+    }
+
+    .stats-icon.revenue {
+        background: #fd7e14;
+        color: white;
+    }
+
+    .stats-info h3 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .stats-info p {
+        margin: 5px 0 0;
+        color: #6c757d;
+    }
+
+    .recent-activities {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .recent-activities h2 {
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .activities-table {
+        width: 100%;
+    }
+
+    .activities-table th {
+        padding: 12px;
+        border-bottom: 2px solid #dee2e6;
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .activities-table td {
+        padding: 12px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .quick-actions {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .quick-actions h2 {
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .action-link {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        color: #495057;
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+
+    .action-link:hover {
+        background-color: #f8f9fa;
+        text-decoration: none;
+    }
+
+    .action-link i {
+        margin-right: 10px;
+        width: 20px;
+        text-align: center;
+    }
+
+    .main-content {
+        padding: 20px;
+        margin-top: 80px;
+    }
+
+    @media (max-width: 768px) {
+        .stats-card {
+            margin-bottom: 15px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="margin-top: 80px;">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-1">Xin chào, {{ request.user.first_name|default:request.user.username }}!</h4>
+                            <p class="mb-0 opacity-75">Chào mừng bạn đến với trang quản trị FimTikit</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="mb-0 opacity-75">{{ current_time|date:"l, d/m/Y" }}</p>
+                            <h5 class="mb-0">{{ current_time|time:"H:i" }}</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <!-- Total Revenue Today -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Doanh thu hôm nay</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ today_revenue|floatformat:0 }} VNĐ</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tickets Sold Today -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Vé đã bán hôm nay</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ tickets_today }} vé</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-ticket-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Movies -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Phim đang chiếu</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_movies }} phim</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-film fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Theaters -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Rạp đang hoạt động</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_theaters }} rạp</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-building fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Recent Activities -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Hoạt động gần đây</h6>
+                    <div class="dropdown">
+                        <button class="btn btn-link text-muted p-0" type="button" data-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="#">
+                                <i class="fas fa-sync-alt mr-2"></i>Làm mới
+                            </a>
+                            <a class="dropdown-item" href="#">
+                                <i class="fas fa-filter mr-2"></i>Lọc
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Thời gian</th>
+                                    <th>Người dùng</th>
+                                    <th>Hoạt động</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for activity in recent_activities %}
+                                <tr>
+                                    <td>{{ activity.created_at|date:"H:i" }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if activity.user.profile_image %}
+                                            <img src="{{ activity.user.profile_image.url }}" class="rounded-circle mr-2" width="32" height="32">
+                                            {% else %}
+                                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mr-2" style="width: 32px; height: 32px;">
+                                                {{ activity.user.username|make_list|first|upper }}
+                                            </div>
+                                            {% endif %}
+                                            <div>
+                                                <div class="font-weight-bold">{{ activity.user.get_full_name|default:activity.user.username }}</div>
+                                                <small class="text-muted">{{ activity.user.email }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ activity.description }}</td>
+                                    <td>
+                                        {% if activity.status == 'success' %}
+                                        <span class="badge badge-success">Thành công</span>
+                                        {% elif activity.status == 'pending' %}
+                                        <span class="badge badge-warning">Đang xử lý</span>
+                                        {% else %}
+                                        <span class="badge badge-danger">Thất bại</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4">
+                                        <div class="text-muted">
+                                            <i class="fas fa-history fa-3x mb-3"></i>
+                                            <p>Chưa có hoạt động nào</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thao tác nhanh</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <a href="{% url 'admin_movies' %}" class="btn btn-light btn-block h-100 p-4 d-flex flex-column align-items-center justify-content-center">
+                                <i class="fas fa-film fa-2x mb-2 text-primary"></i>
+                                <span>Quản lý phim</span>
+                            </a>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <a href="{% url 'admin_theaters' %}" class="btn btn-light btn-block h-100 p-4 d-flex flex-column align-items-center justify-content-center">
+                                <i class="fas fa-building fa-2x mb-2 text-warning"></i>
+                                <span>Quản lý rạp</span>
+                            </a>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <a href="{% url 'admin_promotions' %}" class="btn btn-light btn-block h-100 p-4 d-flex flex-column align-items-center justify-content-center">
+                                <i class="fas fa-percent fa-2x mb-2 text-info"></i>
+                                <span>Khuyến mãi</span>
+                            </a>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <a href="{% url 'admin_users' %}" class="btn btn-light btn-block h-100 p-4 d-flex flex-column align-items-center justify-content-center">
+                                <i class="fas fa-users fa-2x mb-2 text-success"></i>
+                                <span>Quản lý người dùng</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue Chart -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Doanh thu 7 ngày qua</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+$(document).ready(function() {
+    // Revenue Chart
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ revenue_dates|safe }},
+            datasets: [{
+                label: 'Doanh thu (VNĐ)',
+                data: {{ revenue_data|safe }},
+                borderColor: '#4e73df',
+                tension: 0.3,
+                fill: true,
+                backgroundColor: 'rgba(78, 115, 223, 0.05)'
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString('vi-VN') + ' VNĐ';
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %} 

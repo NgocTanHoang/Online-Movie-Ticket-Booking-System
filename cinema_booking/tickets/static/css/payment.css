@@ -1,0 +1,297 @@
+/* body {
+  font-family: Arial;
+  font-size: 17px;
+  padding: 8px;
+  margin-top: 50px;
+  margin-bottom: 20px;
+} */
+
+#payment_div>* {
+    box-sizing: border-box;
+  }
+  
+  .payment-row {
+    display: -ms-flexbox;
+    /* IE10 */
+    display: flex;
+    -ms-flex-wrap: wrap;
+    /* IE10 */
+    flex-wrap: wrap;
+    margin: 0 -16px;
+  }
+  
+  .col-25 {
+    -ms-flex: 25%;
+    /* IE10 */
+    flex: 25%;
+  }
+  
+  .col-50 {
+    -ms-flex: 50%;
+    /* IE10 */
+    flex: 50%;
+  }
+  
+  .col-75 {
+    -ms-flex: 75%;
+    /* IE10 */
+    flex: 75%;
+  }
+  
+  .col-25,
+  .col-50,
+  .col-75 {
+    padding: 0 16px;
+  }
+  
+  .payment-container {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .payment-header {
+    margin-bottom: 20px;
+  }
+  
+  .payment-header h3 {
+    font-size: 18px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .badge {
+    background: #e6f3ff;
+    color: #0066cc;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .payment-search {
+    margin-bottom: 20px;
+  }
+  
+  .payment-search input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .bank-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+  
+  .bank-item {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .bank-item:hover {
+    border-color: #0066cc;
+    box-shadow: 0 2px 8px rgba(0, 102, 204, 0.1);
+  }
+  
+  .bank-item img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+  
+  .payment-info {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 4px;
+  }
+  
+  .order-info h4 {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 15px;
+  }
+  
+  .merchant {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 10px;
+  }
+  
+  .order-id {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 10px;
+  }
+  
+  .amount {
+    font-size: 14px;
+    color: #333;
+    margin-top: 15px;
+  }
+  
+  .price {
+    font-weight: bold;
+    color: #0066cc;
+  }
+  
+  .next-step.pay-btn {
+    background: #0066cc;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    margin-top: 20px;
+  }
+  
+  .next-step.pay-btn:hover {
+    background: #0052a3;
+  }
+  
+  .previous-step {
+    background: transparent;
+    border: 1px solid #ddd;
+    color: #666;
+    padding: 12px 25px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  .previous-step:hover {
+    background: #f8f9fa;
+  }
+  
+  .payment-row {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .col-75 {
+    width: 100%;
+  }
+  
+  /* For payment Method */
+  .payment-row.payment {
+    margin-top: 25px;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+  }
+  
+  .col-50.payment {
+    float: right;
+    padding-left: 70px;
+  }
+  
+  .method {
+    display: flex;
+    flex-direction: column;
+    width: 382px;
+    height: 122px;
+    padding-top: 20px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 18px;
+    background-color: rgb(249, 249, 249);
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .card-logos {
+    display: flex;
+    width: 150px;
+    justify-content: space-between;
+    align-items: center;
+  
+  }
+  
+  .radio-input {
+    margin-top: 20px;
+    color: #000;
+  }
+  
+  input[type='radio'] {
+    display: inline-block;
+  }
+  
+  /* Payment ends */
+  
+  input[type=text] {
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    color: var(--theme-para);
+  }
+  
+  label {
+    margin-bottom: 10px;
+    display: block;
+    color: var(--theme-title);
+    float: left;
+  }
+  
+  .icon-container {
+    /* margin-bottom: 20px; */
+    /* padding: 7px 0; */
+    font-size: 24px;
+  }
+  
+  .btn {
+    /* background-color: #4CAF50; */
+    color: var(--theme-white);
+    padding: 12px;
+    margin: 10px 0;
+    border: none;
+    /* display:flex; */
+    /* width: 40px; */
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 17px;
+  }
+  
+  /* .btn:hover {
+    background-color: #45a049;
+    color: white;
+  } */
+  
+  a {
+    color: #2196F3;
+  }
+  
+  /* hr {
+    border: 1px solid lightgrey;
+  } */
+  
+  span.price {
+    float: right;
+    color: grey;
+  }
+  
+  /* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other (also change the direction - make the "cart" column go on top) */
+  @media (max-width: 800px) {
+    .payment-row {
+      flex-direction: column;
+    }
+  
+    .col-25 {
+      margin-bottom: 20px;
+    }
+  }

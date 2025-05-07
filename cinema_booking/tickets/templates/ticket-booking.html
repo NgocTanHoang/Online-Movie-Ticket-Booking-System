@@ -1,0 +1,880 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ticket Booking</title>
+  <!-- <link rel="stylesheet" type="text/css" href="{% static 'css/style-starter.css' %}"> -->
+  <link rel="stylesheet" href="https://npmcdn.com/flickity@2/dist/flickity.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/progress.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/ticket-booking.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/e-ticket.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/payment.css' %}">
+  <link href="https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,700" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style-starter.css' %}">
+  <link href="//fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" type="text/css"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <link rel="stylesheet" href="https://npmcdn.com/flickity@2/dist/flickity.min.css">
+  <script src="https://npmcdn.com/flickity@2/dist/flickity.pkgd.js"></script>
+
+  <style>
+    .carousel-cell {
+        background: rgb(243, 235, 235);
+        transition: background-color 0.3s;
+    }
+    
+    .carousel-cell.selected {
+        background: #df0e62 !important;
+        color: white;
+    }
+    
+    .carousel-cell:hover {
+        background: #ff4e8c;
+        color: white;
+        cursor: pointer;
+    }
+
+    .previous-step {
+        background-color: #df0e62;
+        color: white;
+        border: none;
+    }
+
+    .previous-step:hover {
+        background-color: #ff4e8c;
+    }
+  </style>
+
+</head>
+
+<body>
+  <header id="site-header" class="w3l-header fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
+      <div class="container">
+        <h1><a class="navbar-brand" href="{% url 'home' %}"><span class="fa fa-film icon-log" aria-hidden="true"></span>
+            Fimji </a></h1>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent"></div>
+        <div class="Login_SignUp" id="login_s">
+          <a class="nav-link" href="{% url 'login' %}"><i class="fa fa-user-circle-o"></i></a>
+        </div>
+        <div class="mobile-position">
+          <nav class="navigation">
+            <div class="theme-switch-wrapper">
+              <label class="theme-switch" for="checkbox">
+                <input type="checkbox" id="checkbox">
+                <div class="mode-container">
+                  <i class="gg-sun"></i>
+                  <i class="gg-moon"></i>
+                </div>
+              </label>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="container" id="progress-container-id">
+    <div class="row">
+      <div class="col">
+        <div class="px-0 pt-4 pb-0 mt-3 mb-3">
+          <form id="form">
+            {% csrf_token %}
+            <ul id="progressbar" class="progressbar-class">
+              <li class="active" id="step1">Show timing selection</li>
+              <li id="step2" class="not_active">Seat Selection</li>
+              <li id="step3" class="not_active">Payment</li>
+              <li id="step4" class="not_active">E-Ticket</li>
+            </ul>
+            <br>
+            <fieldset>
+              <div id="screen-select-div">
+                <h2>Show time Selection</h2>
+                <div class="carousel carousel-nav" data-flickity='{"contain": true, "pageDots": false }'>
+                  {% for day in days %}
+                  <div class="carousel-cell {% if day.iso_date == selected_date|date:'Y-m-d' %}selected{% endif %}"
+                    id="day-{{ day.id }}" data-date="{{ day.iso_date }}"
+                    onclick="selectDay('{{ day.iso_date }}', '{{ day.id }}')">
+                    <div class="date-numeric">{{ day.numeric }}</div>
+                    <div class="date-day">{{ day.day_name }}</div>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <ul class="time-ul" id="showtimes-list">
+                  {% include "partials/showtimes_list.html" %}
+                </ul>
+              </div>
+              <input id="screen-next-btn" type="button" name="next-step" class="next-step" value="Continue Booking"
+                disabled />
+              <input type="button" name="previous-step" class="cancel-pay-btn" value="Back"
+                onclick="window.location.href='{% url 'home' %}'" />
+
+            </fieldset>
+            <fieldset>
+              <!-- Seat Selection Step (using iframe) -->
+              <h2>Seat Booking</h2>
+              <div class="countdown-timer">
+                <p>Thời gian còn lại để chọn ghế: <span id="seat-countdown">10:00</span></p>
+              </div>
+              <div>
+                <iframe id="seat-sel-iframe" style="box-shadow: 0 14px 12px 0 var(--theme-border), 0 10px 50px 0 var(--theme-border); 
+                         width: 1000px; 
+                         height: 600px; 
+                         display: block; 
+                         margin-left: auto; 
+                         margin-right: auto; 
+                         border: none;" {% if showtime_id %} src="{% url 'seat_sel' showtime_id %}" {% else %}
+                  src="about:blank" {% endif %}></iframe>
+              </div>
+              <br>
+              <div class="seat-selection-status" style="text-align: center; margin-bottom: 15px; color: #666;">
+                <p id="seat-selection-message">Vui lòng chọn ghế để tiếp tục</p>
+              </div>
+              <input type="button" name="next-step" class="next-step" value="Proceed to Payment" disabled />
+              <input type="button" name="previous-step" class="previous-step" value="Back" />
+            </fieldset>
+            <fieldset>
+              <!-- Payment Page -->
+              <div class="countdown-timer">
+                <p>Thời gian còn lại để thanh toán: <span id="payment-countdown">10:00</span></p>
+              </div>
+              <div class="payment-container">
+                <div class="payment-header">
+                  <h2>Thanh Toán</h2>
+                  <p>Vui lòng chọn phương thức thanh toán</p>
+                </div>
+
+                <div class="payment-amount">
+                  <h3>Số tiền: <span id="payment-amount">0</span>₫</h3>
+                </div>
+
+                <div class="payment-tabs">
+                  <div class="payment-tab active" data-tab="vnpay">VNPAY</div>
+                  <div class="payment-tab" data-tab="bank">Thẻ ATM</div>
+                  <div class="payment-tab" data-tab="qr">Quét mã QR</div>
+                </div>
+
+                <div class="payment-content active" id="vnpay-content">
+                  <div class="vnpay-info">
+                    <h3>Thanh toán qua VNPAY</h3>
+                    <p>Bạn sẽ được chuyển hướng đến trang thanh toán VNPAY để hoàn tất giao dịch.</p>
+                    <div class="vnpay-features">
+                      <div class="feature">
+                        <i class="fa fa-shield"></i>
+                        <span>Bảo mật cao</span>
+                      </div>
+                      <div class="feature">
+                        <i class="fa fa-bolt"></i>
+                        <span>Thanh toán nhanh chóng</span>
+                      </div>
+                      <div class="feature">
+                        <i class="fa fa-credit-card"></i>
+                        <span>Hỗ trợ nhiều ngân hàng</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="payment-content" id="bank-content">
+                  <h3>Chọn ngân hàng</h3>
+                  <div class="bank-options">
+                    <div class="bank-option">
+                      <img src="{% static 'image/vietcombank.jpg' %}" alt="Vietcombank">
+                      <p>Vietcombank</p>
+                    </div>
+                    <div class="bank-option">
+                      <img src="{% static 'image/BIDV.png' %}" alt="BIDV">
+                      <p>BIDV</p>
+                    </div>
+                    <div class="bank-option">
+                      <img src="{% static 'image/techcombank.png' %}" alt="Techcombank">
+                      <p>Techcombank</p>
+                    </div>
+                    <div class="bank-option">
+                      <img src="{% static 'image/VPbank.jpg' %}" alt="VPBank">
+                      <p>VPBank</p>
+                    </div>
+                    <div class="bank-option">
+                      <img src="{% static 'image/MB_Bank.png' %}" alt="MB Bank">
+                      <p>MB Bank</p>
+                    </div>
+                    <div class="bank-option">
+                      <img src="{% static 'image/images (1).png' %}" alt="ACB">
+                      <p>ACB</p>
+                    </div>
+                    <div class="bank-option">
+                      <img src="{% static 'image/tpbank.png' %}" alt="TPBank">
+                      <p>TPBank</p>
+                    </div>
+                    <div class="bank-option">
+                      <img src="{% static 'image/images (2).png' %}" alt="Sacombank">
+                      <p>Sacombank</p>
+                    </div>
+                  </div>
+
+                  <div class="bank-details">
+                    <div class="form-group">
+                      <label for="account-number">Số tài khoản</label>
+                      <input type="text" id="account-number" placeholder="Nhập số tài khoản của bạn">
+                    </div>
+
+                    <div class="form-group">
+                      <label for="account-name">Tên chủ tài khoản</label>
+                      <input type="text" id="account-name" placeholder="Nhập tên chủ tài khoản">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="payment-content" id="qr-content">
+                  <div class="qr-container">
+                    <div class="qr-img">
+                      <img src="/api/placeholder/200/200" alt="QR Code">
+                    </div>
+                    <div class="qr-info">
+                      <p>Sử dụng ứng dụng ngân hàng hoặc ví điện tử để quét mã QR này để thanh toán.</p>
+                      <p><strong>Lưu ý:</strong> Vui lòng không đóng trang này cho đến khi thanh toán hoàn tất.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="btn-container">
+                  <button class="btn btn-back">Hủy thanh toán</button>
+                  <button class="btn btn-confirm" onclick="processPayment()">Xác nhận thanh toán</button>
+                </div>
+              </div>
+
+            </fieldset>
+            <fieldset>
+              <h2>E-Ticket</h2>
+              <div class="ticket-body">
+                <div class="ticket">
+                  <div class="holes-top"></div>
+                  <div class="title">
+                    <p class="cinema">MyShowz Entertainment</p>
+                    <p class="movie-title">Movie Name</p>
+                  </div>
+                  <div class="poster">
+                    <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/25240/only-god-forgives.jpg"
+                      alt="Movie: Only God Forgives" />
+                  </div>
+                  <div class="info">
+                    <table class="info-table ticket-table">
+                      <tr>
+                        <th>SCREEN</th>
+                        <th>ROW</th>
+                        <th>SEAT</th>
+                      </tr>
+                      <tr>
+                        <td class="bigger">18</td>
+                        <td class="bigger">H</td>
+                        <td class="bigger">24</td>
+                      </tr>
+                    </table>
+                    <table class="info-table ticket-table">
+                      <tr>
+                        <th>PRICE</th>
+                        <th>DATE</th>
+                        <th>TIME</th>
+                      </tr>
+                      <tr>
+                        <td>RS.12.00</td>
+                        <td>4/13/21</td>
+                        <td>19:30</td>
+                      </tr>
+                    </table>
+                  </div>
+                  <div class="holes-lower"></div>
+                  <div class="serial">
+                    <table class="barcode ticket-table">
+                      <tr>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:white;"></td>
+                        <td style="background-color:black;"></td>
+                        <td style="background-color:black;"></td>
+                      </tr>
+                    </table>
+                    <table class="numbers ticket-table">
+                      <tr>
+                        <td>9</td>
+                        <td>1</td>
+                        <td>7</td>
+                        <td>3</td>
+                        <td>7</td>
+                        <td>5</td>
+                        <td>4</td>
+                        <td>4</td>
+                        <td>4</td>
+                        <td>5</td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td>4</td>
+                        <td>7</td>
+                        <td>8</td>
+                        <td>7</td>
+                        <td>3</td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td>4</td>
+                        <td>5</td>
+                        <td>2</td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <input type="button" name="previous-step" class="home-page-btn" value="Browse to Home Page"
+                onclick="location.href='{% url "home" %}';" />
+            </fieldset>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global variables
+    let selectedShowtimeId = null;
+    let prevId = null;
+    let seatCountdownInterval;
+    let paymentCountdownInterval;
+    let seatTimeLeft = 1200; // 20 minutes in seconds
+    let paymentTimeLeft = 1200; // 20 minutes in seconds
+
+    // Global variables for seat selection
+    let selectedSeats = [];
+    let totalPrice = 0;
+
+    // Function to get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Countdown timer functions
+    function startSeatCountdown() {
+      clearInterval(seatCountdownInterval);
+      seatTimeLeft = 1200; // 20 minutes in seconds
+      updateSeatCountdown();
+      seatCountdownInterval = setInterval(updateSeatCountdown, 1000);
+    }
+
+    function updateSeatCountdown() {
+      const minutes = Math.floor(seatTimeLeft / 60);
+      const seconds = seatTimeLeft % 60;
+      document.getElementById('seat-countdown').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      if (seatTimeLeft <= 0) {
+        clearInterval(seatCountdownInterval);
+        alert('Hết thời gian chọn ghế!');
+        window.location.href = "{% url 'home' %}";
+      }
+      seatTimeLeft--;
+    }
+
+    function startPaymentCountdown() {
+      clearInterval(paymentCountdownInterval);
+      paymentTimeLeft = 1200; // 20 minutes in seconds
+      updatePaymentCountdown();
+      paymentCountdownInterval = setInterval(updatePaymentCountdown, 1000);
+    }
+
+    function updatePaymentCountdown() {
+      const minutes = Math.floor(paymentTimeLeft / 60);
+      const seconds = paymentTimeLeft % 60;
+      document.getElementById('payment-countdown').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      if (paymentTimeLeft <= 0) {
+        clearInterval(paymentCountdownInterval);
+        alert('Hết thời gian thanh toán!');
+        window.location.href = "{% url 'home' %}";
+      }
+      paymentTimeLeft--;
+    }
+
+    // Message handler for seat selection updates
+    window.addEventListener('message', function(event) {
+        console.log('Received message:', event.data);
+        if (event.data.type === 'seatsUpdated') {
+            selectedSeats = event.data.seats;
+            totalPrice = event.data.price;
+            console.log('Updated seats:', selectedSeats);
+            console.log('Updated price:', totalPrice);
+            updatePaymentButton();
+            updatePaymentAmount();
+        }
+    });
+
+    // Function to update payment button state
+    function updatePaymentButton() {
+        const paymentButton = document.querySelector('.next-step[value="Proceed to Payment"]');
+        const messageElement = document.getElementById('seat-selection-message');
+        
+        console.log('Updating payment button:', {
+            selectedSeats,
+            totalPrice,
+            buttonDisabled: !(selectedSeats && selectedSeats.length > 0 && totalPrice > 0)
+        });
+        
+        if (selectedSeats && selectedSeats.length > 0 && totalPrice > 0) {
+            paymentButton.disabled = false;
+            paymentButton.style.backgroundColor = '#df0e62';
+            paymentButton.style.color = 'white';
+            paymentButton.style.cursor = 'pointer';
+            messageElement.textContent = `Đã chọn ${selectedSeats.length} ghế - Tổng tiền: ${totalPrice.toLocaleString('vi-VN')}₫`;
+            messageElement.style.color = '#28a745'; // Green color for success
+        } else {
+            paymentButton.disabled = true;
+            paymentButton.style.backgroundColor = '#ccc';
+            paymentButton.style.color = '#666';
+            paymentButton.style.cursor = 'not-allowed';
+            messageElement.textContent = 'Vui lòng chọn ghế để tiếp tục';
+            messageElement.style.color = '#666'; // Default color
+        }
+    }
+
+    // Function to update payment amount display
+    function updatePaymentAmount() {
+        const paymentAmountElement = document.getElementById('payment-amount');
+        if (paymentAmountElement && totalPrice > 0) {
+            paymentAmountElement.textContent = totalPrice.toLocaleString('vi-VN');
+        }
+    }
+
+    // Hàm tạo vé
+    async function createTicket() {
+        try {
+            // Get CSRF token
+            const csrfToken = getCookie('csrftoken');
+            if (!csrfToken) {
+                throw new Error('CSRF token not found');
+            }
+
+            // Validate selected seats
+            if (!selectedSeats || selectedSeats.length === 0) {
+                throw new Error('Vui lòng chọn ít nhất một ghế');
+            }
+
+            // Validate showtime ID
+            if (!selectedShowtimeId) {
+                throw new Error('Vui lòng chọn suất chiếu');
+            }
+
+            // Prepare request data
+            const requestData = {
+                showtime_id: selectedShowtimeId,
+                seats: selectedSeats,
+                payment_method: 'cash' // Default payment method
+            };
+
+            console.log('Sending request with data:', requestData);
+
+            // Make API request
+            const response = await fetch('/api/tickets/create_with_qr/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Có lỗi xảy ra khi tạo vé');
+            }
+
+                        // Chuyển sang bước thanh toán (fieldset tiếp theo)
+            alert('Tạo vé thành công! Đang chuyển sang bước thanh toán...');
+            goToNextStep(); // Hàm này sẽ chuyển sang fieldset tiếp theo (Payment)
+
+        } catch (error) {
+            console.error('Error creating ticket:', error);
+            alert(error.message);
+        }
+    }
+
+    // Hàm cập nhật trạng thái giao dịch
+    async function updateTransaction(transactionId) {
+        try {
+            // Get selected payment method
+            const activeTab = document.querySelector('.payment-tab.active');
+            const paymentMethod = activeTab ? activeTab.getAttribute('data-tab') : 'bank';
+
+            const response = await fetch('/api/update-transaction/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    transaction_id: transactionId,
+                    payment_method: paymentMethod,
+                    status: 'completed'
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Không thể cập nhật giao dịch');
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error updating transaction:', error);
+            throw error;
+        }
+    };
+
+    // Function to update the state of the Continue Booking button
+    function updateContinueButton() {
+      const continueButton = document.getElementById('screen-next-btn');
+      continueButton.disabled = !selectedShowtimeId; // Disable if no showtime selected
+    }
+
+    // Function to handle day selection
+    function selectDay(date, id) {
+      // Remove selected class from all cells
+      document.querySelectorAll('.carousel-cell').forEach(cell => {
+        cell.classList.remove('selected');
+        cell.style.background = "rgb(243, 235, 235)";
+      });
+      
+      // Add selected class to clicked cell
+      const selectedCell = document.getElementById(`day-${id}`);
+      selectedCell.classList.add('selected');
+      selectedCell.style.background = "#df0e62";
+
+      // Make AJAX request to get updated showtimes
+      fetch(`?date=${date}`, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('showtimes-list').innerHTML = html;
+        
+        // Reset selected showtime
+        selectedShowtimeId = null;
+        updateContinueButton();
+      })
+      .catch(error => {
+        console.error('Error fetching showtimes:', error);
+      });
+    }
+
+    // Function to handle showtime selection
+    function selectShowtime(showtimeId) {
+      console.log('selectShowtime called with:', showtimeId);
+      // Remove selected class from all showtime buttons
+      document.querySelectorAll('.screen-time').forEach(button => {
+        button.classList.remove('selected');
+      });
+      
+      // Add selected class to clicked button
+      const button = document.getElementById(`showtime-${showtimeId}`);
+      if (button) {
+        button.classList.add('selected');
+      }
+      
+      // Update selected showtime ID
+      selectedShowtimeId = showtimeId;
+      
+      // Enable continue button
+      updateContinueButton();
+      
+      // Update iframe src if it exists
+      const iframe = document.getElementById('seat-sel-iframe');
+      if (iframe) {
+        iframe.src = `{% url 'seat_sel' 0 %}`.replace('0', showtimeId);
+      }
+
+      // Start countdown
+      startSeatCountdown();
+    }
+
+    // Add event listener for payment button
+    document.querySelector('.next-step[value="Proceed to Payment"]').addEventListener('click', async function(e) {
+        e.preventDefault();
+        console.log('Payment button clicked');
+        console.log('Current state:', { selectedSeats, totalPrice, selectedShowtimeId });
+        
+        if (selectedShowtimeId && selectedSeats && selectedSeats.length > 0 && totalPrice > 0) {
+            try {
+                await createTicket();
+            } catch (error) {
+                console.error('Payment error:', error);
+                alert('Có lỗi xảy ra trong quá trình thanh toán: ' + error.message);
+            }
+        } else {
+            alert('Vui lòng chọn suất chiếu và ghế trước khi tiếp tục.');
+        }
+    });
+
+    // Initialize on document load
+    document.addEventListener("DOMContentLoaded", function () {
+      // Set default selected date (first day or URL parameter)
+      const urlParams = new URLSearchParams(window.location.search);
+      const dateParam = urlParams.get('date');
+
+      if (dateParam) {
+        const dateElements = document.querySelectorAll('.carousel-cell');
+        dateElements.forEach(el => {
+          if (el.getAttribute('data-date') === dateParam) {
+            el.style.background = "#df0e62";
+            el.classList.add('selected');
+            prevId = el.id.replace('day-', '');
+          }
+        });
+      } else {
+        const firstDayElement = document.querySelector('.carousel-cell');
+        if (firstDayElement) {
+          const firstDayId = firstDayElement.id.replace('day-', '');
+          firstDayElement.style.background = "#df0e62";
+          firstDayElement.classList.add('selected');
+          prevId = firstDayId;
+        }
+      }
+
+      // Initialize button state
+      updateContinueButton();
+
+      // Setup event listeners for any existing showtime buttons
+      const showtimeButtons = document.querySelectorAll('.screen-time');
+      showtimeButtons.forEach(button => {
+        if (!button.disabled) {
+          const showtimeId = button.id.replace('showtime-', '');
+          button.addEventListener('click', () => {
+            selectShowtime(showtimeId);
+            startSeatCountdown(); // Start seat countdown when showtime is selected
+          });
+        }
+      });
+
+      // Add event listener for payment step
+      const paymentStep = document.querySelector('fieldset:nth-child(3)');
+      if (paymentStep) {
+        const observer = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+              const style = paymentStep.getAttribute('style');
+              if (style && style.includes('display: block')) {
+                startPaymentCountdown();
+              }
+            }
+          });
+        });
+
+        observer.observe(paymentStep, {
+          attributes: true,
+          attributeFilter: ['style']
+        });
+      }
+
+      // Add event listener for form steps
+      const form = document.getElementById('form');
+      if (form) {
+        form.addEventListener('click', function(e) {
+          if (e.target.classList.contains('next-step')) {
+            const currentFieldset = e.target.closest('fieldset');
+            const nextFieldset = currentFieldset.nextElementSibling;
+            
+            if (nextFieldset) {
+              currentFieldset.style.display = 'none';
+              nextFieldset.style.display = 'block';
+              
+              // Start appropriate countdown based on step
+              if (nextFieldset.querySelector('#seat-sel-iframe')) {
+                startSeatCountdown();
+              } else if (nextFieldset.querySelector('.payment-container')) {
+                startPaymentCountdown();
+              }
+            }
+          }
+        });
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Tab switching
+      const tabs = document.querySelectorAll('.payment-tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          // Remove active class from all tabs and contents
+          tabs.forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.payment-content').forEach(content => {
+            content.classList.remove('active');
+          });
+          
+          // Add active class to current tab
+          this.classList.add('active');
+          
+          // Show corresponding content
+          const tabId = this.getAttribute('data-tab');
+          document.getElementById(tabId + '-content').classList.add('active');
+        });
+      });
+      
+      // Bank selection
+      const bankOptions = document.querySelectorAll('.bank-option');
+      bankOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          bankOptions.forEach(o => o.classList.remove('selected'));
+          this.classList.add('selected');
+        });
+      });
+    });
+
+    // Function to process payment
+    async function processPayment() {
+        try {
+            const activeTab = document.querySelector('.payment-tab.active');
+            const paymentMethod = activeTab ? activeTab.getAttribute('data-tab') : 'vnpay';
+            
+            if (paymentMethod === 'vnpay') {
+                // Get transaction ID from the ticket creation response
+                const transactionId = window.transactionId;
+                if (!transactionId) {
+                    throw new Error('Không tìm thấy thông tin giao dịch');
+                }
+
+                // Create VNPAY payment URL
+                const response = await fetch(`/payment/vnpay/create/${transactionId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Redirect to VNPAY payment page
+                    window.location.href = data.payment_url;
+                } else {
+                    throw new Error(data.error || 'Không thể tạo URL thanh toán');
+                }
+            } else {
+                // Handle other payment methods
+                const response = await fetch('/update-transaction/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        transaction_id: window.transactionId,
+                        payment_method: paymentMethod,
+                        status: 'completed'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    window.location.href = '/e-ticket/';
+                } else {
+                    throw new Error(data.error || 'Thanh toán thất bại');
+                }
+            }
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+  </script>
+  <script src="https://npmcdn.com/flickity@2/dist/flickity.pkgd.js"></script>
+  <script type="text/javascript"
+    src='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js'></script>
+  <script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
+  <script src="{% static 'js/theme-change.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/ticket-booking.js' %}"></script>
+
+
+  <script src="{% static 'seat_selection/scripts.js' %}"></script>
+</body>
+
+</html>

@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chọn rạp chiếu - FimTikit{% endblock %}
+
+{% block content %}
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">Chọn rạp chiếu</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        <div class="mb-3">
+            <label for="provinceSelect" class="form-label">Chọn tỉnh/thành phố</label>
+            <select class="form-select" id="provinceSelect">
+                <option value="">Chọn tỉnh/thành phố</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="theaterSelect" class="form-label">Chọn rạp</label>
+            <select class="form-select" id="theaterSelect" disabled>
+                <option value="">Chọn rạp</option>
+            </select>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-primary" id="confirmTheater" disabled>Xác nhận</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let theaters = [];
+
+// Fetch theaters data when page loads
+fetch('/api/theaters/')
+    .then(response => response.json())
+    .then(data => {
+        theaters = data.theaters;
+        updateProvinceSelect();
+    })
+    .catch(error => {
+        console.error('Error fetching theaters:', error);
+        alert('Could not load theater data structure.');
+    });
+
+function updateProvinceSelect() {
+    const provinceSelect = document.getElementById('provinceSelect');
+    const provinces = [...new Set(theaters.map(theater => theater.province))].sort();
+    
+    provinceSelect.innerHTML = '<option value="">Chọn tỉnh/thành phố</option>';
+    provinces.forEach(province => {
+        provinceSelect.innerHTML += `<option value="${province}">${province}</option>`;
+    });
+}
+
+function updateTheaterSelect(province) {
+    const theaterSelect = document.getElementById('theaterSelect');
+    theaterSelect.innerHTML = '<option value="">Chọn rạp</option>';
+    
+    if (province) {
+        const filteredTheaters = theaters.filter(theater => theater.province === province);
+        filteredTheaters.forEach(theater => {
+            theaterSelect.innerHTML += `<option value="${theater.id}">${theater.name}</option>`;
+        });
+        theaterSelect.disabled = false;
+    } else {
+        theaterSelect.disabled = true;
+    }
+    
+    document.getElementById('confirmTheater').disabled = true;
+}
+
+// Event Listeners
+document.getElementById('provinceSelect').addEventListener('change', function() {
+    updateTheaterSelect(this.value);
+});
+
+document.getElementById('theaterSelect').addEventListener('change', function() {
+    document.getElementById('confirmTheater').disabled = !this.value;
+});
+
+document.getElementById('confirmTheater').addEventListener('click', function() {
+    const theaterId = document.getElementById('theaterSelect').value;
+    const theaterName = document.getElementById('theaterSelect').selectedOptions[0].text;
+    
+    if (!theaterId) return;
+
+    fetch('/select-theater/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: `theater=${theaterId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update theater name in header if it exists
+            const theaterNameElement = document.getElementById('selectedTheaterName');
+            if (theaterNameElement) {
+                theaterNameElement.textContent = theaterName;
+            }
+            // Close modal if it exists
+            const modal = bootstrap.Modal.getInstance(document.getElementById('theaterModal'));
+            if (modal) {
+                modal.hide();
+            }
+            // Reload page if we're on a page that needs updating
+            if (window.location.pathname.includes('/movies/') || 
+                window.location.pathname.includes('/chi-tiet-phim-')) {
+                window.location.reload();
+            }
+        } else {
+            alert('Không thể chọn rạp. Vui lòng thử lại.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Đã xảy ra lỗi. Vui lòng thử lại.');
+    });
+});
+</script>
+{% endblock %} 

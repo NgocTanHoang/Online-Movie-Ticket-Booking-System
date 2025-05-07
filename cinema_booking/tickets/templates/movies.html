@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Phim - FimTikit{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Custom styles for movie detail page */
+    .movie-detail-card {
+        background-color: var(--theme-bg);
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        color: var(--theme-text);
+    }
+    .movie-poster img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+    }
+    .trailer-section iframe {
+        width: 100%;
+        height: 400px;
+        border: none;
+        border-radius: 8px;
+    }
+    .showtimes-section h4 {
+        color: var(--theme-title);
+        margin-bottom: 15px;
+    }
+    .theater-list .list-group-item {
+         background-color: var(--theme-layer);
+         border-color: var(--theme-border);
+         color: var(--theme-text);
+    }
+    .theater-list .list-group-item.active {
+         background-color: var(--theme-primary);
+         border-color: var(--theme-primary);
+         color: #fff;
+    }
+    .showtime-btn {
+        margin: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!--/movies -->
+<!--grids-sec1-->
+<section class="w3l-grids">
+    <div class="grids-main py-4">
+        <div class="container py-lg-4">
+            <div class="headerhny-title">
+                <h3 class="hny-title">Phim Phổ Biến</h3>
+            </div>
+            <div class="owl-four owl-carousel owl-theme">
+                {% for movie in movies %}
+                <div class="item vhny-grid">
+                    <div class="box16">
+                        <a href="{% url 'movie_detail' movie.id %}">
+                            <figure>
+                                <img class="img-fluid" src="{{ movie.poster_url }}" alt="{{ movie.title }}">
+                            </figure>
+                            <div class="box-content">
+                                <h3 class="title">{{ movie.title }}</h3>
+                                <h4>
+                                    <span class="post"><span class="fa fa-clock-o"></span> {{ movie.duration }}</span>
+                                    <span class="post fa fa-heart text-right"></span>
+                                </h4>
+                            </div>
+                            <span class="fa fa-play video-icon" aria-hidden="true"></span>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+<!--grids-sec1-->
+<section class="w3l-grids">
+    <div class="grids-main py-5">
+        <div class="container py-lg-4">
+            <div class="headerhny-title">
+                <div class="w3l-title-grids">
+                    <div class="headerhny-left">
+                        <h3 class="hny-title">Phim Mới Nhất</h3>
+                    </div>
+                    <div class="headerhny-right text-lg-right">
+                        <h4><a class="show-title" href="{% url 'movies'%}">Xem tất cả</a></h4>
+                    </div>
+                </div>
+            </div>
+            <div class="w3l-populohny-grids">
+                {% for movie in movies_latest %}
+                <div class="item vhny-grid">
+                    <div class="box16 mb-0">
+                        <figure>
+                            <img class="img-fluid" src="{{ movie.poster_url }}" alt="{{ movie.title }}">
+                        </figure>
+                        <a href="{% url 'movie_detail' movie.id %}">
+                            <div class="box-content">
+                                <h3 class="title">{{ movie.title }}</h3>
+                                <h4>
+                                    <span class="post"><span class="fa fa-clock-o"> </span> {{ movie.duration }}</span>
+                                    <span class="post fa fa-heart text-right"></span>
+                                </h4>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Adults Section -->
+            <div class="w3l-title-grids">
+                <div class="headerhny-left">
+                    <h3 class="hny-title">Phim Người Lớn</h3>
+                </div>
+                <div class="headerhny-right text-lg-right">
+                    <h4><a class="show-title" href="{% url 'movies'%}">Xem tất cả</a></h4>
+                </div>
+            </div>
+            <div class="w3l-populohny-grids">
+                {% for movie in movies_adults %}
+                <div class="item vhny-grid">
+                    <div class="box16 mb-0">
+                        <figure>
+                            <img class="img-fluid" src="{{ movie.poster_url }}" alt="{{ movie.title }}">
+                        </figure>
+                        <a href="{% url 'movie_detail' movie.id %}">
+                            <div class="box-content">
+                                <h3 class="title">{{ movie.title }}</h3>
+                                <h4>
+                                    <span class="post"><span class="fa fa-clock-o"> </span> {{ movie.duration }}</span>
+                                    <span class="post fa fa-heart text-right"></span>
+                                </h4>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="w3l-albums py-5" id="projects">
+    <div class="container py-lg-4">
+        <div class="row">
+            <div class="col-lg-12 mx-auto">
+                <!--Horizontal Tab-->
+                <div id="parentHorizontalTab">
+                    <ul class="resp-tabs-list hor_1">
+                        <li>Phim Gần Đây</li>
+                        <li>Phim Xu Hướng</li>
+                        <div class="clear"></div>
+                    </ul>
+                    <div class="resp-tabs-container hor_1">
+                        <div class="albums-content">
+                            <div class="row">
+                                {% for movie in movies|slice:":3" %}
+                                <div class="col-lg-4 new-relise-gd mt-lg-0 mt-4">
+                                    <div class="slider-info">
+                                        <div class="img-circle">
+                                            <a href="{% url 'movie_detail' movie.id %}">
+                                                <img src="{{ movie.poster_url }}" class="img-fluid" alt="{{ movie.title }}">
+                                                <div class="overlay-icon">
+                                                    <span class="fa fa-play video-icon" aria-hidden="true"></span>
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="message">
+                                            <p>{{ movie.language|default:"Unknown" }}</p>
+                                            <a class="author-book-title" href="{% url 'movie_detail' movie.id %}">
+                                                {{ movie.title }}
+                                            </a>
+                                            <h4>
+                                                <span class="post">
+                                                    <span class="fa fa-clock-o"></span> {{ movie.duration }}
+                                                </span>
+                                                <span class="post fa fa-heart text-right"></span>
+                                            </h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        $('.owl-four').owlCarousel({
+            loop: true,
+            margin: 20,
+            nav: false,
+            responsiveClass: true,
+            autoplay: false,
+            autoplayTimeout: 5000,
+            autoplaySpeed: 1000,
+            autoplayHoverPause: false,
+            responsive: {
+                0: {
+                    items: 1,
+                    nav: false
+                },
+                480: {
+                    items: 2,
+                    nav: true
+                },
+                667: {
+                    items: 2,
+                    nav: true
+                },
+                1000: {
+                    items: 2,
+                    nav: true
+                }
+            }
+        });
+
+        //Horizontal Tab
+        $('#parentHorizontalTab').easyResponsiveTabs({
+            type: 'default',
+            width: 'auto',
+            fit: true,
+            tabidentify: 'hor_1',
+            activate: function (event) {
+                var $tab = $(this);
+                var $info = $('#nested-tabInfo');
+                var $name = $('span', $info);
+                $name.text($tab.text());
+                $info.show();
+            }
+        });
+    });
+</script>
+{% endblock %}

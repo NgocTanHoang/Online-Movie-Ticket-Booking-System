@@ -1,0 +1,487 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Quản lý Lịch Chiếu - FimTikit{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .filter-section {
+        background: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .showtime-table {
+        background: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .btn-add-showtime {
+        margin-bottom: 20px;
+    }
+    .status-active {
+        color: #28a745;
+    }
+    .status-inactive {
+        color: #dc3545;
+    }
+    .search-button {
+        height: 38px;
+        margin-top: 32px;
+    }
+    #alertContainer {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+    }
+    .custom-alert {
+        min-width: 300px;
+        margin-bottom: 10px;
+        animation: slideIn 0.5s ease-in-out;
+    }
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Alert Container -->
+<div id="alertContainer"></div>
+
+<div class="container-fluid" style="margin-top: 80px;">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý Lịch Chiếu</h1>
+        <button class="btn btn-primary" data-toggle="modal" data-target="#addShowtimeModal">
+            <i class="fas fa-plus"></i> Thêm Lịch Chiếu
+        </button>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <form id="filterForm" class="row align-items-end">
+            <div class="col-md-2 mb-3">
+                <label for="theater">Rạp:</label>
+                <select class="form-control" id="theater" name="theater">
+                    <option value="">Tất cả rạp</option>
+                    {% for theater in theaters %}
+                    <option value="{{ theater.id }}">{{ theater.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="movie">Phim:</label>
+                <select class="form-control" id="movie" name="movie">
+                    <option value="">Tất cả phim</option>
+                    {% for movie in movies %}
+                    <option value="{{ movie.id }}">{{ movie.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 mb-3">
+                <label for="date">Ngày chiếu:</label>
+                <input type="date" class="form-control" id="date" name="date">
+            </div>
+            <div class="col-md-2 mb-3">
+                <label for="status">Trạng thái:</label>
+                <select class="form-control" id="status" name="status">
+                    <option value="">Tất cả</option>
+                    <option value="active">Đang hoạt động</option>
+                    <option value="inactive">Đã kết thúc</option>
+                </select>
+            </div>
+            <div class="col-md-2 mb-3">
+                <button type="button" id="searchButton" class="btn btn-primary btn-block search-button">
+                    <i class="fas fa-search"></i> Tìm kiếm
+                </button>
+            </div>
+            <div class="col-md-1 mb-3">
+                <button type="button" id="resetButton" class="btn btn-secondary btn-block search-button">
+                    <i class="fas fa-redo"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Showtimes Table -->
+    <div class="showtime-table">
+        <table class="table table-bordered" id="showtimesTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Rạp</th>
+                    <th>Phòng</th>
+                    <th>Phim</th>
+                    <th>Ngày chiếu</th>
+                    <th>Giờ bắt đầu</th>
+                    <th>Giờ kết thúc</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for showtime in showtimes %}
+                <tr>
+                    <td>{{ showtime.id }}</td>
+                    <td>{{ showtime.room.theater.name }}</td>
+                    <td>{{ showtime.room.name }}</td>
+                    <td>{{ showtime.movie.title }}</td>
+                    <td>{{ showtime.show_date|date:"d/m/Y" }}</td>
+                    <td>{{ showtime.start_time|time:"H:i" }}</td>
+                    <td>{{ showtime.end_time|time:"H:i" }}</td>
+                    <td>
+                        {% if showtime.is_active %}
+                        <span class="status-active"><i class="fas fa-check-circle"></i> Đang hoạt động</span>
+                        {% else %}
+                        <span class="status-inactive"><i class="fas fa-times-circle"></i> Đã kết thúc</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-info edit-showtime" data-id="{{ showtime.id }}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger delete-showtime" data-id="{{ showtime.id }}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Showtime Modal -->
+<div class="modal fade" id="addShowtimeModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Lịch Chiếu Mới</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addShowtimeForm">
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label for="add_theater">Rạp:</label>
+                            <select class="form-control" id="add_theater" name="theater" required>
+                                <option value="">Chọn rạp</option>
+                                {% for theater in theaters %}
+                                <option value="{{ theater.id }}">{{ theater.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="add_room">Phòng:</label>
+                            <select class="form-control" id="add_room" name="room" required disabled>
+                                <option value="">Chọn phòng</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <label for="add_movie">Phim:</label>
+                            <select class="form-control" id="add_movie" name="movie" required>
+                                <option value="">Chọn phim</option>
+                                {% for movie in movies %}
+                                <option value="{{ movie.id }}">{{ movie.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="add_date">Ngày chiếu:</label>
+                            <input type="date" class="form-control" id="add_date" name="show_date" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="add_time">Giờ bắt đầu:</label>
+                            <input type="time" class="form-control" id="add_time" name="start_time" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveShowtime">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+function showAlert(message, type = 'danger') {
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show custom-alert" role="alert">
+            ${message}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    `;
+    $('#alertContainer').append(alertHtml);
+    
+    // Tự động ẩn sau 5 giây
+    setTimeout(() => {
+        $('.custom-alert').last().alert('close');
+    }, 5000);
+}
+
+$(document).ready(function() {
+    // Initialize DataTable
+    var table = $('#showtimesTable').DataTable({
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+        },
+        "processing": true,
+        "serverSide": false,
+        "columnDefs": [
+            {
+                "targets": 0,
+                "data": "id"
+            },
+            {
+                "targets": 1,
+                "data": null,
+                "render": function(data, type, row) {
+                    return row.room ? row.room.theater.name : '';
+                }
+            },
+            {
+                "targets": 2,
+                "data": null,
+                "render": function(data, type, row) {
+                    return row.room ? row.room.name : '';
+                }
+            },
+            {
+                "targets": 3,
+                "data": null,
+                "render": function(data, type, row) {
+                    return row.movie ? row.movie.title : '';
+                }
+            },
+            {
+                "targets": 4,
+                "data": "show_date",
+                "render": function(data) {
+                    if (!data) return '';
+                    var date = new Date(data);
+                    return date.toLocaleDateString('vi-VN');
+                }
+            },
+            {
+                "targets": 5,
+                "data": "start_time"
+            },
+            {
+                "targets": 6,
+                "data": "end_time"
+            },
+            {
+                "targets": 7,
+                "data": null,
+                "render": function(data, type, row) {
+                    return row.is_active ? 
+                        '<span class="status-active"><i class="fas fa-check-circle"></i> Đang hoạt động</span>' :
+                        '<span class="status-inactive"><i class="fas fa-times-circle"></i> Đã kết thúc</span>';
+                }
+            },
+            {
+                "targets": 8,
+                "data": null,
+                "orderable": false,
+                "render": function(data, type, row) {
+                    return '<button class="btn btn-sm btn-info edit-showtime" data-id="' + row.id + '">' +
+                           '<i class="fas fa-edit"></i></button> ' +
+                           '<button class="btn btn-sm btn-danger delete-showtime" data-id="' + row.id + '">' +
+                           '<i class="fas fa-trash"></i></button>';
+                }
+            }
+        ]
+    });
+
+    // Initialize date picker
+    flatpickr("#date", {
+        dateFormat: "Y-m-d",
+        allowInput: true
+    });
+
+    // Handle theater change for room selection
+    $('#add_theater').change(function() {
+        var theaterId = $(this).val();
+        var roomSelect = $('#add_room');
+        roomSelect.prop('disabled', true);
+        
+        if (theaterId) {
+            $.ajax({
+                url: '/api/theaters/' + theaterId + '/rooms/',
+                method: 'GET',
+                success: function(data) {
+                    roomSelect.empty().append('<option value="">Chọn phòng</option>');
+                    data.forEach(function(room) {
+                        roomSelect.append(
+                            $('<option></option>').val(room.id).text(room.name)
+                        );
+                    });
+                    roomSelect.prop('disabled', false);
+                }
+            });
+        }
+    });
+
+    // Handle form submission
+    $('#saveShowtime').click(function() {
+        var form = $('#addShowtimeForm');
+        var formData = new FormData(form[0]);
+
+        $.ajax({
+            url: '/api/showtimes/',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                $('#addShowtimeModal').modal('hide');
+                location.reload();
+            },
+            error: function(xhr) {
+                alert('Có lỗi xảy ra: ' + xhr.responseText);
+            }
+        });
+    });
+
+    // Handle search button click
+    $('#searchButton').click(function() {
+        var filters = {};
+        
+        // Chỉ thêm các filter có giá trị
+        var theater = $('#theater').val();
+        var movie = $('#movie').val();
+        var date = $('#date').val();
+        var status = $('#status').val();
+
+        if (theater) filters.theater = theater;
+        if (movie) filters.movie = movie;
+        if (date) filters.date = date;
+        if (status) filters.status = status;
+
+        // Show loading state
+        $(this).prop('disabled', true);
+        $(this).html('<i class="fas fa-spinner fa-spin"></i> Đang tìm...');
+
+        // Log filters being sent
+        console.log('Sending filters:', filters);
+
+        $.get('/api/showtimes/', filters)
+            .done(function(data) {
+                // Log received data
+                console.log('Received data:', data);
+
+                // Clear existing table data
+                table.clear();
+
+                if (data.length === 0) {
+                    showAlert('Không tìm thấy kết quả nào phù hợp với điều kiện tìm kiếm.', 'info');
+                } else {
+                    // Add new data
+                    table.rows.add(data).draw();
+                    showAlert('Đã tìm thấy ' + data.length + ' kết quả.', 'success');
+                }
+            })
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                console.error('Error fetching data:', textStatus, errorThrown);
+                console.error('Response:', jqXHR.responseText);
+                showAlert('Có lỗi xảy ra khi tìm kiếm. Vui lòng thử lại.', 'danger');
+            })
+            .always(function() {
+                // Reset button state
+                $('#searchButton').prop('disabled', false);
+                $('#searchButton').html('<i class="fas fa-search"></i> Tìm kiếm');
+            });
+    });
+
+    // Handle reset button click
+    $('#resetButton').click(function() {
+        // Reset all form fields
+        $('#filterForm')[0].reset();
+        
+        // Clear DataTable
+        table.clear().draw();
+        
+        // Show alert
+        showAlert('Đã xóa bộ lọc tìm kiếm.', 'info');
+    });
+
+    // Handle delete showtime
+    $(document).on('click', '.delete-showtime', function() {
+        const id = $(this).data('id');
+        const confirmDelete = () => {
+            $.ajax({
+                url: '/api/showtimes/' + id + '/',
+                method: 'DELETE',
+                success: function() {
+                    showAlert('Xóa lịch chiếu thành công!', 'success');
+                    table.row($(this).parents('tr')).remove().draw();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Delete error:', error);
+                    showAlert('Có lỗi xảy ra khi xóa lịch chiếu. Vui lòng thử lại.');
+                }
+            });
+        };
+
+        // Tạo modal xác nhận xóa
+        const modalHtml = `
+            <div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Xác nhận xóa</h5>
+                            <button type="button" class="close" data-dismiss="modal">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Bạn có chắc chắn muốn xóa lịch chiếu này?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                            <button type="button" class="btn btn-danger" id="confirmDelete">Xóa</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Thêm modal vào body nếu chưa tồn tại
+        if (!$('#deleteConfirmModal').length) {
+            $('body').append(modalHtml);
+        }
+
+        // Hiển thị modal và xử lý sự kiện xác nhận
+        $('#deleteConfirmModal').modal('show');
+        $('#confirmDelete').one('click', function() {
+            $('#deleteConfirmModal').modal('hide');
+            confirmDelete();
+        });
+    });
+});
+</script>
+{% endblock %} 

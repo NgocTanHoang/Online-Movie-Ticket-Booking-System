@@ -1,0 +1,131 @@
+/* Main Content Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+}
+
+.main-content {
+    padding: 40px 0;
+}
+
+/* Movie Card Styles */
+.movie-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    transition: transform 0.3s ease;
+}
+
+.movie-card:hover {
+    transform: translateY(-5px);
+}
+
+.movie-card img {
+    border-radius: 10px 10px 0 0;
+    width: 100%;
+    height: auto;
+}
+
+.movie-info {
+    padding: 20px;
+}
+
+.movie-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.movie-details {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+.movie-rating {
+    color: #ffc107;
+    margin-right: 10px;
+}
+
+.book-now-btn {
+    background-color: #ff4e8c;
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.book-now-btn:hover {
+    background-color: #ff1a70;
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Filter Section Styles */
+.filter-section {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+}
+
+.filter-section h4 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.filter-options label {
+    display: block;
+    margin-bottom: 10px;
+    color: #666;
+    cursor: pointer;
+}
+
+.filter-options input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+/* Pagination Styles */
+.pagination {
+    justify-content: center;
+    margin-top: 40px;
+}
+
+.pagination .page-item .page-link {
+    color: #ff4e8c;
+    padding: 10px 15px;
+    margin: 0 5px;
+    border-radius: 5px;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #ff4e8c;
+    border-color: #ff4e8c;
+    color: #fff;
+}
+
+.pagination .page-item .page-link:hover {
+    background-color: #ff1a70;
+    color: #fff;
+    border-color: #ff1a70;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .movie-card {
+        margin-bottom: 20px;
+    }
+    
+    .filter-section {
+        margin-bottom: 20px;
+    }
+    
+    .main-content {
+        padding: 20px 0;
+    }
+} 

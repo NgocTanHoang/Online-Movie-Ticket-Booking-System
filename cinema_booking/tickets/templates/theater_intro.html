@@ -1,0 +1,354 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Giới Thiệu Rạp{% endblock %}
+
+{% block extra_css %}
+<style>
+    .theater-hero {
+        background-size: cover;
+        background-position: center;
+        height: 400px;
+        position: relative;
+        margin-bottom: 50px;
+        margin-top: 100px;
+    }
+
+    .theater-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7));
+    }
+
+    .theater-hero-content {
+        position: relative;
+        z-index: 1;
+        color: white;
+        padding: 50px 0;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .theater-info {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+        transition: transform 0.3s;
+    }
+
+    .theater-info:hover {
+        transform: translateY(-5px);
+    }
+
+    .theater-gallery {
+        margin: 30px 0;
+    }
+
+    .gallery-item {
+        margin-bottom: 20px;
+        overflow: hidden;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .gallery-item img {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        transition: transform 0.5s;
+    }
+
+    .gallery-item img:hover {
+        transform: scale(1.1);
+    }
+
+    .price-table {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .price-table table {
+        width: 100%;
+    }
+
+    .price-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+    }
+
+    .price-table td {
+        font-size: 1.1em;
+    }
+
+    .now-showing {
+        margin-top: 50px;
+    }
+
+    .movie-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+    }
+
+    .movie-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .movie-card img {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+    }
+
+    .movie-info {
+        padding: 20px;
+    }
+
+    #map {
+        height: 400px;
+        width: 100%;
+        border-radius: 15px;
+        margin: 20px 0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .section-title {
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 25px;
+        position: relative;
+        padding-bottom: 15px;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background: #ff4e8c;
+    }
+
+    .contact-info i {
+        color: #ff4e8c;
+        margin-right: 10px;
+        width: 20px;
+    }
+
+    .contact-info p {
+        margin-bottom: 15px;
+        font-size: 1.1em;
+    }
+
+    .facilities-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .facilities-list li {
+        margin-bottom: 10px;
+        padding-left: 30px;
+        position: relative;
+    }
+
+    .facilities-list li::before {
+        content: '✓';
+        color: #ff4e8c;
+        position: absolute;
+        left: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="theater-hero" style="background-image: url('{{ selected_theater.image_url|default:'/static/images/theater-default.jpg' }}');">
+    <div class="container">
+        <div class="theater-hero-content">
+            <h1 class="display-4">{{ selected_theater.name }}</h1>
+            <p class="lead">{{ selected_theater.address }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="container" style="margin-top: 50px;">
+    <!-- Theater Information -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="theater-info">
+                <h2 class="section-title">Giới Thiệu</h2>
+                <p class="lead">{{ selected_theater.description|default:"Rạp chiếu phim hiện đại với hệ thống âm thanh và hình ảnh chất lượng cao." }}</p>
+                
+                <h3 class="section-title">Tiện Ích</h3>
+                <ul class="facilities-list">
+                    <li>Hệ thống âm thanh Dolby Atmos</li>
+                    <li>Màn hình IMAX</li>
+                    <li>Ghế ngồi thoải mái</li>
+                    <li>Quầy bán đồ ăn</li>
+                    <li>Bãi đỗ xe rộng rãi</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="theater-info">
+                <h3 class="section-title">Thông Tin Liên Hệ</h3>
+                <div class="contact-info">
+                    <p><i class="fas fa-phone"></i> {{ selected_theater.phone|default:"0123 456 789" }}</p>
+                    <p><i class="fas fa-envelope"></i> {{ selected_theater.email|default:"contact@theater.com" }}</p>
+                    <p><i class="fas fa-clock"></i> Giờ mở cửa: 8:00 - 23:00</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h2 class="section-title">Vị Trí</h2>
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <!-- Gallery -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h2 class="section-title">Hình Ảnh Rạp</h2>
+            <div class="row theater-gallery">
+                {% for image in theater_images %}
+                <div class="col-md-4 gallery-item">
+                    <img src="{{ image.url }}" alt="Theater Image {{ forloop.counter }}" class="img-fluid">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Price Table -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h2 class="section-title">Bảng Giá Vé</h2>
+            <div class="price-table">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Loại Vé</th>
+                            <th>Giá (VNĐ)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Vé 2D Thường</td>
+                            <td>80,000</td>
+                        </tr>
+                        <tr>
+                            <td>Vé 2D VIP</td>
+                            <td>120,000</td>
+                        </tr>
+                        <tr>
+                            <td>Vé 3D Thường</td>
+                            <td>120,000</td>
+                        </tr>
+                        <tr>
+                            <td>Vé 3D VIP</td>
+                            <td>160,000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Now Showing -->
+    <div class="row now-showing">
+        <div class="col-12">
+            <h2 class="section-title">Phim Đang Chiếu</h2>
+            <div class="row">
+                {% for movie in now_showing %}
+                <div class="col-md-3 mb-4">
+                    <div class="movie-card">
+                        <img src="{{ movie.poster_url }}" alt="{{ movie.title }}">
+                        <div class="movie-info">
+                            <h5>{{ movie.title }}</h5>
+                            <p class="text-muted">{{ movie.genre }}</p>
+                            <a href="{% url 'movie_detail' movie.id %}" class="btn btn-danger btn-sm">Chi Tiết</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function initMap() {
+        // Tạo map với tọa độ mặc định
+        const map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 15,
+            center: { lat: 10.762622, lng: 106.660172 },
+            styles: [
+                {
+                    "featureType": "poi",
+                    "elementType": "labels",
+                    "stylers": [
+                        {
+                            "visibility": "off"
+                        }
+                    ]
+                }
+            ]
+        });
+
+        // Sử dụng Geocoding API để chuyển đổi địa chỉ thành tọa độ
+        const geocoder = new google.maps.Geocoder();
+        const address = '{{ selected_theater.address }}';
+
+        geocoder.geocode({ address: address }, (results, status) => {
+            if (status === 'OK' && results[0]) {
+                // Cập nhật vị trí map
+                map.setCenter(results[0].geometry.location);
+                
+                // Thêm marker
+                const marker = new google.maps.Marker({
+                    map: map,
+                    position: results[0].geometry.location,
+                    title: '{{ selected_theater.name }}',
+                    animation: google.maps.Animation.DROP
+                });
+
+                // Thêm info window
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                        <div style="padding: 10px;">
+                            <h5 style="margin: 0 0 5px 0;">{{ selected_theater.name }}</h5>
+                            <p style="margin: 0;">{{ selected_theater.address }}</p>
+                        </div>
+                    `
+                });
+
+                // Mở info window khi click vào marker
+                marker.addListener('click', () => {
+                    infoWindow.open(map, marker);
+                });
+            } else {
+                console.error('Geocode was not successful for the following reason: ' + status);
+            }
+        });
+    }
+</script>
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC3JpOiYmkMa3I131-txf5HMh_mzsA2YUY&callback=initMap">
+</script>
+{% endblock %} 

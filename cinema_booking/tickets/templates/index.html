@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}FimTikit - Trang chủ{% endblock %}
+
+{% block extra_css %}
+<!-- Owl Carousel CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<!-- <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}"> Add Magnific Popup CSS -->
+
+<style>
+	/* Styles specific to index.html */
+	.zoom-anim-dialog {
+		max-width: 1200px;
+		margin: 10px auto;
+		position: relative;
+	}
+	.zoom-anim-dialog iframe {
+		width: 100%;
+		height: 700px;
+		display: block;
+		border-radius: 10px;
+	}
+	.w3l-mid-slider .mid-view {
+		filter: brightness(1.2) !important;
+		image-rendering: -webkit-optimize-contrast;
+		image-rendering: crisp-edges;
+	}
+	.w3l-mid-slider .mid-view::before {
+		background: rgba(9, 6, 20, 0.3) !important;
+	}
+
+	/* Tăng kích thước popup cho tất cả small-dialog */
+	.zoom-anim-dialog {
+		max-width: 1200px; /* Rộng 1000px */
+		margin: 10px auto;
+		position: relative;
+	}
+
+	/* Tăng kích thước iframe bên trong */
+	.zoom-anim-dialog iframe {
+		width: 100%;
+		height: 700px; /* Cao 600px */
+		display: block;
+		border-radius: 10px;
+	}
+
+	.w3l-mid-slider .mid-view {
+		filter: brightness(1.2) !important; /* Tăng độ sáng ảnh nền */
+		image-rendering: -webkit-optimize-contrast; /* Tăng độ nét trên Chrome */
+		image-rendering: crisp-edges; /* Tăng độ nét trên Firefox */
+	}
+
+	.w3l-mid-slider .mid-view::before {
+		background: rgba(9, 6, 20, 0.3) !important;/* Giảm độ mờ của lớp phủ */
+	}
+
+	.selected-theater {
+		margin-left: 15px;
+		border-left: 1px solid rgba(255,255,255,0.1);
+		padding-left: 15px;
+	}
+	.selected-theater a {
+		color: #000;
+		font-size: 0.9em;
+		display: flex;
+		align-items: center;
+		gap: 5px;
+	}
+	.selected-theater a:hover {
+		color: #ff4e8c;
+	}
+	.selected-theater .fa-map-marker {
+		font-size: 1.2em;
+		color: #000;
+	}
+	.selected-theater .fa-chevron-down {
+		font-size: 0.8em;
+		margin-left: 5px;
+		color: #000;
+	}
+
+	/* Styles for theater selection modal */
+	#theaterModal .modal-title,
+	#theaterModal .form-group label,
+	#theaterModal .form-control,
+	#theaterModal .btn-primary {
+		color: #000;
+	}
+
+	#theaterModal .modal-header {
+		border-bottom: 1px solid #dee2e6;
+	}
+
+	#theaterModal .modal-footer {
+		border-top: 1px solid #dee2e6;
+	}
+
+	#theaterModal .close {
+		color: #000;
+		opacity: 0.5;
+	}
+
+	#theaterModal .close:hover {
+		opacity: 0.75;
+	}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- main-slider -->
+<section class="w3l-main-slider position-relative" id="home">
+	<div class="companies20-content">
+		<div class="owl-one owl-carousel owl-theme">
+			{% for movie in movies|slice:":4" %}
+			<div class="item">
+				<li>
+					<div class="slider-info banner-view{% if forloop.counter == 2 %} banner-top1{% elif forloop.counter == 3 %} banner-top2{% elif forloop.counter == 4 %} banner-top3{% endif %} bg bg2"
+						style="background-image: url('{{ movie.poster_url }}'); background-size: cover; background-position: center;">
+						<div class="banner-info">
+							<h3>
+								<a class="title-gd" href="{% url 'movie_detail' movie.id %}" style="color: white;">
+									{{ movie.title }}
+								</a>
+							</h3>
+							<p>{{ movie.description|truncatechars:100 }}</p>
+							<a href="#small-dialog{{ forloop.counter }}" class="popup-with-zoom-anim play-view1">
+								<span class="video-play-icon">
+									<span class="fa fa-play"></span>
+								</span>
+								<h6>Xem trailer</h6>
+							</a>
+							<!-- Magnific Popup for Trailer -->
+							<div id="small-dialog{{ forloop.counter }}" class="zoom-anim-dialog mfp-hide">
+								{% if movie.trailer_url %}
+								<iframe src="{{ movie.trailer_url }}" allow="autoplay; fullscreen"></iframe>
+								{% else %}
+								<p>Trailer không có sẵn.</p>
+								{% endif %}
+							</div>
+						</div>
+					</div>
+				</li>
+			</div>
+			{% empty %}
+			 <div class="item"><li><div class="slider-info banner-view bg bg2"><div class="banner-info"><p>No movies available for banner.</p></div></div></li></div>
+			{% endfor %}
+		</div>
+	</div>
+</section>
+<!-- //main-slider -->
+
+<!-- Popular Movies Section -->
+<section class="w3l-grids">
+	<div class="grids-main py-5">
+		<div class="container py-lg-3">
+			<div class="headerhny-title">
+				<div class="w3l-title-grids">
+					<div class="headerhny-left">
+						<h3 class="hny-title">Phim phổ biến</h3>
+					</div>
+					<div class="headerhny-right text-lg-right">
+						<h4><a class="show-title" href="{% url 'movies' %}">Xem tất cả</a></h4>
+					</div>
+				</div>
+			</div>
+			<div class="w3l-populohny-grids">
+				{% for movie in movies %} {# Assuming 'movies' context variable holds popular movies #}
+				<div class="item vhny-grid">
+					<div class="box16">
+						<a href="{% url 'movie_detail' movie.id %}">
+							<figure>
+								<img class="img-fluid" src="{{ movie.poster_url }}" alt="{{ movie.title }}">
+							</figure>
+						</a>
+						<div class="box-content">
+							<h3 class="title">
+								<a href="{% url 'movie_detail' movie.id %}" style="color: white;">{{ movie.title }}</a>
+							</h3>
+							<h4>
+								<span class="post"><span class="fa fa-clock-o"></span> {{ movie.duration }} phút</span>
+								<span class="post"><span class="fa fa-film"></span> {{ movie.genre }}</span>
+							</h4>
+						</div>
+						<a href="#small-dialog{{ movie.id }}-trailer" class="popup-with-zoom-anim play-view1 box16-play-icon">
+							<span class="fa fa-play video-icon" aria-hidden="true"></span>
+						</a>
+						 <!-- Magnific Popup for Trailer -->
+						 <div id="small-dialog{{ movie.id }}-trailer" class="zoom-anim-dialog mfp-hide">
+							 {% if movie.trailer_url %}
+							 <iframe src="{{ movie.trailer_url }}" allow="autoplay; fullscreen"></iframe>
+							 {% else %}
+							 <p>Trailer không có sẵn.</p>
+							 {% endif %}
+						 </div>
+					</div>
+				</div>
+				{% empty %}
+				 <p>Hiện chưa có phim phổ biến.</p>
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+</section>
+<!-- //Popular Movies Section -->
+
+<!-- Latest Movies Section -->
+<section class="w3l-grids">
+	<div class="grids-main py-5">
+		<div class="container py-lg-3">
+			<div class="headerhny-title">
+				<div class="w3l-title-grids">
+					<div class="headerhny-left">
+						<h3 class="hny-title">Phim mới</h3>
+					</div>
+					<div class="headerhny-right text-lg-right">
+						<h4><a class="show-title" href="{% url 'movies' %}">Xem tất cả</a></h4>
+					</div>
+				</div>
+			</div>
+			<div class="owl-three owl-carousel owl-theme">
+				{% for movie in movies_latest %} {# Assuming 'movies_latest' context variable #}
+				<div class="item vhny-grid">
+					<div class="box16 mb-0">
+						<a href="{% url 'movie_detail' movie.id %}">
+							<figure>
+								<img class="img-fluid" src="{{ movie.poster_url }}" alt="{{ movie.title }}">
+							</figure>
+							<div class="box-content">
+								<h4> 
+									<span class="post"><span class="fa fa-clock-o"></span> {{ movie.duration }} phút</span>
+									<span class="post"><span class="fa fa-film"></span> {{ movie.genre }}</span>
+								</h4>
+							</div>
+							<a href="#small-dialog{{ movie.id }}-trailer-latest" class="popup-with-zoom-anim play-view1 box16-play-icon">
+								<span class="fa fa-play video-icon" aria-hidden="true"></span>
+							</a>
+							 <!-- Magnific Popup for Trailer -->
+							 <div id="small-dialog{{ movie.id }}-trailer-latest" class="zoom-anim-dialog mfp-hide">
+								 {% if movie.trailer_url %}
+								 <iframe src="{{ movie.trailer_url }}" allow="autoplay; fullscreen"></iframe>
+								 {% else %}
+								 <p>Trailer không có sẵn.</p>
+								 {% endif %}
+							 </div>
+						</a>
+					</div>
+					<h3> <a class="title-gd" href="{% url 'movie_detail' movie.id %}">{{ movie.title }}</a></h3>
+					<p>Đạo diễn: {{ movie.director }}</p>
+					<p>Diễn viên: {{ movie.actor|truncatechars:50 }}</p>
+					<div class="button-center text-center mt-4">
+						<a href="{% url 'movie_detail' movie.id %}" class="btn watch-button">Xem chi tiết</a>
+					</div>
+				</div>
+				{% empty %}
+				 <div class="item"><p>Hiện chưa có phim mới.</p></div>
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+</section>
+<!-- //Latest Movies Section -->
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Owl Carousel JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+<!-- Magnific Popup JS -->
+<script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
+
+<script>
+	// Banner Slider
+	$(document).ready(function () {
+		$('.owl-one').owlCarousel({
+			stagePadding: 280,
+			loop: true,
+			margin: 20,
+			nav: true,
+			responsiveClass: true,
+			autoplay: true,
+			autoplayTimeout: 5000,
+			autoplaySpeed: 1000,
+			autoplayHoverPause: false,
+			responsive: {
+				0: { items: 1, stagePadding: 40, nav: false },
+				480: { items: 1, stagePadding: 60, nav: true },
+				667: { items: 1, stagePadding: 80, nav: true },
+				1000: { items: 1, nav: true }
+			}
+		});
+	});
+
+	// Latest Movies Slider
+	$(document).ready(function () {
+		$('.owl-three').owlCarousel({
+			loop: true,
+			margin: 20,
+			nav: false,
+			responsiveClass: true,
+			autoplay: true,
+			autoplayTimeout: 5000,
+			autoplaySpeed: 1000,
+			autoplayHoverPause: false,
+			responsive: {
+				0: { items: 2, nav: false },
+				480: { items: 2, nav: true },
+				667: { items: 3, nav: true },
+				1000: { items: 5, nav: true }
+			}
+		});
+	});
+
+	// Magnific Popup Initialization
+	$(document).ready(function () {
+		$('.popup-with-zoom-anim').magnificPopup({
+			type: 'inline',
+			fixedContentPos: false,
+			fixedBgPos: true,
+			overflowY: 'auto',
+			closeBtnInside: true,
+			preloader: false,
+			midClick: true,
+			removalDelay: 300,
+			mainClass: 'my-mfp-zoom-in'
+		});
+	});
+</script>
+{% endblock %}
+

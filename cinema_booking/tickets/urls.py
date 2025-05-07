@@ -1,0 +1,34 @@
+from django.contrib import admin
+from django.urls import path, include
+from .views import (home_view, auth_view, logout_view, movies_view, about_view, 
+                   ticket_view, ticket_booking_view, seat_sel_view, movie_detail,
+                   select_theater, admin_dashboard, admin_movies, admin_theaters,
+                   admin_users, admin_promotions, admin_reports, admin_content,
+                   manage_showtimes, create_ticket, update_transaction, theater_info)
+
+urlpatterns = [
+    path('logout/', logout_view, name='logout'),
+    path('login/', auth_view, name='login'),
+    path('movies/', movies_view, name='movies'),
+    path('chi-tiet-phim-<int:movie_id>/', movie_detail, name='movie_detail'),
+    path('about/', about_view, name='about'),
+    path('ticket/', ticket_view, name='ticket'),
+    path('select-theater/', select_theater, name='select_theater'),
+    path('ticketbooking/<str:cinema>/<int:movie_id>/', ticket_booking_view, name='ticketbooking'),
+    path('seat-selection/<int:showtime_id>/', seat_sel_view, name='seat_sel'),
+    path('management/dashboard/', admin_dashboard, name='admin_dashboard'),
+    path('management/movies/', admin_movies, name='admin_movies'),
+    path('management/theaters/', admin_theaters, name='admin_theaters'),
+    path('management/users/', admin_users, name='admin_users'),
+    path('management/promotions/', admin_promotions, name='admin_promotions'),
+    path('management/reports/', admin_reports, name='admin_reports'),
+    path('management/content/', admin_content, name='admin_content'),
+    path('management/showtimes/', manage_showtimes, name='manage_showtimes'),
+    path('api/', include('tickets.api.urls')),
+    path('api/tickets/create/', create_ticket, name='create_ticket'),
+    path('api/tickets/update-transaction/', update_transaction, name='update_transaction'),
+    path('theater-info/', theater_info, name='theater_info'),
+    path('theater-info/<int:theater_id>/', theater_info, name='theater_info'),
+    path('', home_view, name='home'),
+]
+    
