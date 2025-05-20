@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Quản lý lịch chiếu{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Quản lý lịch chiếu</h5>
+                    <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#addShowtimeModal">
+                        <i class="fas fa-plus"></i> Thêm lịch chiếu
+                    </button>
+                </div>
+                <div class="card-body">
+                    <!-- Bộ lọc -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <select class="form-select" id="movieFilter">
+                                <option value="">Tất cả phim</option>
+                                {% for movie in movies %}
+                                <option value="{{ movie.id }}">{{ movie.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="theaterFilter">
+                                <option value="">Tất cả rạp</option>
+                                {% for theater in theaters %}
+                                <option value="{{ theater.id }}">{{ theater.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="date" class="form-control" id="dateFilter">
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-primary w-100" onclick="filterShowtimes()">
+                                <i class="fas fa-filter"></i> Lọc
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Bảng lịch chiếu -->
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Phim</th>
+                                    <th>Rạp</th>
+                                    <th>Phòng</th>
+                                    <th>Ngày chiếu</th>
+                                    <th>Giờ bắt đầu</th>
+                                    <th>Giờ kết thúc</th>
+                                    <th>Giá vé</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="showtimesTableBody">
+                                {% for showtime in showtimes %}
+                                <tr>
+                                    <td>{{ showtime.movie.title }}</td>
+                                    <td>{{ showtime.room.theater.name }}</td>
+                                    <td>{{ showtime.room.room_number }}</td>
+                                    <td>{{ showtime.show_date|date:"d/m/Y" }}</td>
+                                    <td>{{ showtime.start_time|time:"H:i" }}</td>
+                                    <td>{{ showtime.end_time|time:"H:i" }}</td>
+                                    <td>{{ showtime.price|floatformat:0|intcomma }} VNĐ</td>
+                                    <td>
+                                        <span class="badge {% if showtime.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ showtime.is_active|yesno:"Đang chiếu,Đã kết thúc" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info" onclick="editShowtime({{ showtime.id }})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteShowtime({{ showtime.id }})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal thêm lịch chiếu -->
+<div class="modal fade" id="addShowtimeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm lịch chiếu mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addShowtimeForm">
+                    <div class="mb-3">
+                        <label class="form-label">Phim</label>
+                        <select class="form-select" name="movie" required>
+                            {% for movie in movies %}
+                            <option value="{{ movie.id }}">{{ movie.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Rạp</label>
+                        <select class="form-select" name="theater" required>
+                            {% for theater in theaters %}
+                            <option value="{{ theater.id }}">{{ theater.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Phòng</label>
+                        <select class="form-select" name="room" required>
+                            {% for room in rooms %}
+                            <option value="{{ room.id }}">Phòng {{ room.room_number }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ngày chiếu</label>
+                        <input type="date" class="form-control" name="show_date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Giờ bắt đầu</label>
+                        <input type="time" class="form-control" name="start_time" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Giá vé</label>
+                        <input type="number" class="form-control" name="price" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="saveShowtime()">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal chỉnh sửa lịch chiếu -->
+<div class="modal fade" id="editShowtimeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chỉnh sửa lịch chiếu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editShowtimeForm">
+                    <input type="hidden" name="showtime_id">
+                    <div class="mb-3">
+                        <label class="form-label">Phim</label>
+                        <select class="form-select" name="movie" required>
+                            {% for movie in movies %}
+                            <option value="{{ movie.id }}">{{ movie.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Rạp</label>
+                        <select class="form-select" name="theater" required>
+                            {% for theater in theaters %}
+                            <option value="{{ theater.id }}">{{ theater.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Phòng</label>
+                        <select class="form-select" name="room" required>
+                            {% for room in rooms %}
+                            <option value="{{ room.id }}">Phòng {{ room.room_number }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ngày chiếu</label>
+                        <input type="date" class="form-control" name="show_date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Giờ bắt đầu</label>
+                        <input type="time" class="form-control" name="start_time" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Giá vé</label>
+                        <input type="number" class="form-control" name="price" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="updateShowtime()">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterShowtimes() {
+    const movieId = document.getElementById('movieFilter').value;
+    const theaterId = document.getElementById('theaterFilter').value;
+    const date = document.getElementById('dateFilter').value;
+    
+    // Gửi request AJAX để lọc lịch chiếu
+    fetch(`/api/showtimes/filter/?movie=${movieId}&theater=${theaterId}&date=${date}`)
+        .then(response => response.json())
+        .then(data => {
+            updateShowtimesTable(data);
+        });
+}
+
+function updateShowtimesTable(showtimes) {
+    const tbody = document.getElementById('showtimesTableBody');
+    tbody.innerHTML = '';
+    
+    showtimes.forEach(showtime => {
+        const row = `
+            <tr>
+                <td>${showtime.movie.title}</td>
+                <td>${showtime.room.theater.name}</td>
+                <td>${showtime.room.room_number}</td>
+                <td>${new Date(showtime.show_date).toLocaleDateString('vi-VN')}</td>
+                <td>${showtime.start_time}</td>
+                <td>${showtime.end_time}</td>
+                <td>${showtime.price.toLocaleString('vi-VN')} VNĐ</td>
+                <td>
+                    <span class="badge ${showtime.is_active ? 'bg-success' : 'bg-danger'}">
+                        ${showtime.is_active ? 'Đang chiếu' : 'Đã kết thúc'}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-info" onclick="editShowtime(${showtime.id})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteShowtime(${showtime.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+}
+
+function saveShowtime() {
+    const form = document.getElementById('addShowtimeForm');
+    const formData = new FormData(form);
+    
+    fetch('/api/showtimes/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Có lỗi xảy ra: ' + data.message);
+        }
+    });
+}
+
+function editShowtime(id) {
+    fetch(`/api/showtimes/${id}/`)
+        .then(response => response.json())
+        .then(data => {
+            const form = document.getElementById('editShowtimeForm');
+            form.showtime_id.value = data.id;
+            form.movie.value = data.movie;
+            form.theater.value = data.room.theater;
+            form.room.value = data.room.id;
+            form.show_date.value = data.show_date;
+            form.start_time.value = data.start_time;
+            form.price.value = data.price;
+            
+            new bootstrap.Modal(document.getElementById('editShowtimeModal')).show();
+        });
+}
+
+function updateShowtime() {
+    const form = document.getElementById('editShowtimeForm');
+    const formData = new FormData(form);
+    const id = formData.get('showtime_id');
+    
+    fetch(`/api/showtimes/${id}/`, {
+        method: 'PUT',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Có lỗi xảy ra: ' + data.message);
+        }
+    });
+}
+
+function deleteShowtime(id) {
+    if (confirm('Bạn có chắc chắn muốn xóa lịch chiếu này?')) {
+        fetch(`/api/showtimes/${id}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Có lỗi xảy ra: ' + data.message);
+            }
+        });
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %} 

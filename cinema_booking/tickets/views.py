@@ -20,12 +20,14 @@ from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.core.serializers import serialize
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, login_required
 from django.utils import timezone
 import qrcode
 import io
 from django.core.files.base import ContentFile
 from .tasks import delete_unpaid_tickets
+import os
+from django.conf import settings
 
 def extract_province(address):
     # Danh sách các tỉnh thành phố đặc biệt cần xử lý
@@ -684,3 +686,111 @@ def theater_info(request, theater_id=None):
     except Exception as e:
         messages.error(request, f'Đã xảy ra lỗi: {str(e)}')
         return redirect('home')
+
+@login_required
+def showtime_management(request):
+    if not request.user.is_staff:
+        return redirect('home')
+        
+    movies = Movie.objects.all()
+    theaters = Theater.objects.all()
+    rooms = Room.objects.all()
+    showtimes = Showtime.objects.all().select_related('movie', 'room', 'room__theater')
+    
+    context = {
+        'movies': movies,
+        'theaters': theaters,
+        'rooms': rooms,
+        'showtimes': showtimes,
+    }
+    return render(request, 'management/showtimes.html', context)
+
+def edit_movie(request, movie_id):
+    movie = get_object_or_404(Movie, id=movie_id)
+    if request.method == 'POST':
+        movie.title = request.POST.get('title')
+        movie.genre = request.POST.get('genre')
+        movie.director = request.POST.get('director')
+        movie.actor = request.POST.get('actor')
+        movie.duration = request.POST.get('duration')
+        movie.release_date = request.POST.get('release_date')
+        movie.language = request.POST.get('language')
+        movie.description = request.POST.get('description')
+        movie.trailer_url = request.POST.get('trailer_url')
+        movie.status = request.POST.get('status')
+        if request.FILES.get('poster'):
+            movie.poster = request.FILES['poster']
+        movie.save()
+        return redirect('admin_movies')
+    return render(request, 'admin/edit_movie.html', {'movie': movie})
+
+@csrf_exempt
+def add_movie(request):
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        genre = request.POST.get('genre')
+        duration = request.POST.get('duration')
+        release_date = request.POST.get('release_date')
+        description = request.POST.get('description')
+        director = request.POST.get('director')
+        actor = request.POST.get('actor')
+        language = request.POST.get('language')
+        trailer_url = request.POST.get('trailer_url')
+        status = request.POST.get('status', 'coming_soon')
+        poster = request.FILES.get('poster')
+        poster_url = ''
+        if poster:
+            poster_dir = os.path.join(settings.MEDIA_ROOT, 'posters')
+            os.makedirs(poster_dir, exist_ok=True)
+            poster_path = os.path.join('posters', poster.name)
+            full_path = os.path.join(settings.MEDIA_ROOT, poster_path)
+            with open(full_path, 'wb+') as destination:
+                for chunk in poster.chunks():
+                    destination.write(chunk)
+            poster_url = settings.MEDIA_URL + 'posters/' + poster.name
+        movie = Movie.objects.create(
+            title=title,
+            genre=genre,
+            duration=duration,
+            release_date=release_date,
+            description=description,
+            director=director,
+            actor=actor,
+            language=language,
+            trailer_url=trailer_url,
+            status=status,
+            poster_url=poster_url,
+        )
+        return JsonResponse({'success': True, 'movie_id': movie.id})
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+
+@require_POST
+@csrf_exempt
+def delete_movie(request, movie_id):
+    try:
+        movie = Movie.objects.get(id=movie_id)
+        movie.delete()
+        return JsonResponse({'success': True})
+    except Movie.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Movie not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+@require_POST
+@csrf_exempt
+def toggle_movie_status(request, movie_id):
+    try:
+        movie = Movie.objects.get(id=movie_id)
+        # Chuyển trạng thái: now_showing <-> archived <-> coming_soon
+        if movie.status == 'now_showing':
+            movie.status = 'archived'
+        elif movie.status == 'archived':
+            movie.status = 'coming_soon'
+        else:
+            movie.status = 'now_showing'
+        movie.save()
+        return JsonResponse({'success': True, 'new_status': movie.status})
+    except Movie.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Movie not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

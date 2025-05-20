@@ -1,0 +1,106 @@
+[
+    {
+        "model": "tickets.showtime",
+        "pk": 1,
+        "fields": {
+            "movie": 1,
+            "room": 1,
+            "show_date": "TODAY",
+            "start_time": "10:00:00",
+            "end_time": "12:08:00",
+            "price": 100000,
+            "reserved_seats": []
+        }
+    },
+    {
+        "model": "tickets.showtime",
+        "pk": 2,
+        "fields": {
+            "movie": 1,
+            "room": 2,
+            "show_date": "TODAY",
+            "start_time": "13:00:00",
+            "end_time": "15:08:00",
+            "price": 100000,
+            "reserved_seats": []
+        }
+    },
+    {
+        "model": "tickets.showtime",
+        "pk": 3,
+        "fields": {
+            "movie": 1,
+            "room": 3,
+            "show_date": "TODAY",
+            "start_time": "16:00:00",
+            "end_time": "18:08:00",
+            "price": 100000,
+            "reserved_seats": []
+        }
+    },
+    {
+        "model": "tickets.showtime",
+        "pk": 4,
+        "fields": {
+            "movie": 1,
+            "room": 4,
+            "show_date": "TODAY",
+            "start_time": "19:00:00",
+            "end_time": "21:08:00",
+            "price": 100000,
+            "reserved_seats": []
+        }
+    },
+    {
+        "model": "tickets.showtime",
+        "pk": 5,
+        "fields": {
+            "movie": 2,
+            "room": 1,
+            "show_date": "TOMORROW",
+            "start_time": "10:00:00",
+            "end_time": "12:08:00",
+            "price": 100000,
+            "reserved_seats": []
+        }
+    },
+    {
+        "model": "tickets.showtime",
+        "pk": 6,
+        "fields": {
+            "movie": 2,
+            "room": 2,
+            "show_date": "TOMORROW",
+            "start_time": "13:00:00",
+            "end_time": "15:08:00",
+            "price": 100000,
+            "reserved_seats": []
+        }
+    },
+    {
+        "model": "tickets.showtime",
+        "pk": 7,
+        "fields": {
+            "movie": 2,
+            "room": 3,
+            "show_date": "TOMORROW",
+            "start_time": "16:00:00",
+            "end_time": "18:08:00",
+            "price": 100000,
+            "reserved_seats": []
+        }
+    },
+    {
+        "model": "tickets.showtime",
+        "pk": 8,
+        "fields": {
+            "movie": 2,
+            "room": 4,
+            "show_date": "TOMORROW",
+            "start_time": "19:00:00",
+            "end_time": "21:08:00",
+            "price": 100000,
+            "reserved_seats": []
+        }
+    }
+] 

@@ -5,108 +5,112 @@
 
 {% block extra_css %}
 <style>
-    .container-fluid {
-        padding-top: 2rem;
+    .container-movie {
+        margin-top: 90px;
+        margin-bottom: 40px;
     }
-    .avatar {
-        width: 40px;
-        height: 60px;
+    .movie-table th, .movie-table td {
+        vertical-align: middle;
+    }
+    .movie-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    .movie-avatar {
+        width: 60px;
+        height: 80px;
         object-fit: cover;
-        border-radius: 4px;
+        border-radius: 8px;
+        background: #f1f1f1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-    .bg-gradient-success {
-        background: linear-gradient(310deg, #17ad37, #98ec2d);
+    .badge-status {
+        font-size: 0.95em;
+        padding: 0.5em 1.2em;
+        border-radius: 1em;
+        font-weight: 500;
+        white-space: nowrap;
+        min-width: 110px;
+        text-align: center;
+        display: inline-block;
     }
-    .bg-gradient-secondary {
-        background: linear-gradient(310deg, #627594, #a8b8d8);
+    .badge-status.active {
+        background: #28a745;
+        color: #fff;
+    }
+    .badge-status.inactive {
+        background: #6c757d;
+        color: #fff;
+    }
+    .btn-add-movie {
+        border-radius: 2em;
+        font-weight: 600;
+        padding: 0.6em 1.5em;
+        font-size: 1.1em;
+        box-shadow: 0 2px 8px rgba(0,123,255,0.08);
+    }
+    .table-responsive {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid" style="margin-top: 80px;">
+<div class="container container-movie">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="d-flex align-items-center">
-            <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary mr-3">
-                <i class="fas fa-arrow-left"></i> Trở lại
-            </a>
-            <h2 class="mb-0">Quản lý phim</h2>
-        </div>
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addMovieModal">
-            <i class="fas fa-plus"></i> Thêm phim mới
+        <h2 class="fw-bold text-primary mb-0">Quản lý phim</h2>
+        <button type="button" class="btn btn-primary btn-add-movie" data-toggle="modal" data-target="#addMovieModal">
+            <i class="fas fa-plus me-2"></i> Thêm phim mới
         </button>
     </div>
-    <div class="row">
-        <div class="col-12">
-            <div class="card mb-4">
-                <div class="card-header pb-0 d-flex justify-content-between align-items-center">
-                    <h6>Danh sách phim</h6>
-                </div>
-                <div class="card-body px-0 pt-0 pb-2">
-                    <div class="table-responsive p-0">
-                        <table class="table align-items-center mb-0">
-                            <thead>
-                                <tr>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Movie</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Duration</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Release Date</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Status</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for movie in movies %}
-                                <tr>
-                                    <td>
-                                        <div class="d-flex px-3 py-1">
-                                            <div>
-                                                <img src="{{ movie.poster.url }}" class="avatar me-3" alt="{{ movie.title }}">
-                                            </div>
-                                            <div class="d-flex flex-column justify-content-center">
-                                                <h6 class="mb-0 text-sm">{{ movie.title }}</h6>
-                                                <p class="text-xs text-secondary mb-0">{{ movie.genre }}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <p class="text-sm font-weight-bold mb-0">{{ movie.duration }} mins</p>
-                                    </td>
-                                    <td>
-                                        <p class="text-sm font-weight-bold mb-0">{{ movie.release_date|date:"M d, Y" }}</p>
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-sm bg-gradient-{{ movie.is_active|yesno:'success,secondary' }}">
-                                            {{ movie.is_active|yesno:'Active,Inactive' }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-link text-secondary mb-0" data-bs-toggle="dropdown">
-                                            <i class="fa fa-ellipsis-v text-xs"></i>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li>
-                                                <a class="dropdown-item" href="#" onclick="editMovie({{ movie.id }})">
-                                                    <i class="fas fa-edit me-2"></i>Edit
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item" href="#" onclick="toggleMovieStatus({{ movie.id }})">
-                                                    <i class="fas fa-power-off me-2"></i>Toggle Status
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item text-danger" href="#" onclick="deleteMovie({{ movie.id }})">
-                                                    <i class="fas fa-trash me-2"></i>Delete
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 movie-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Poster</th>
+                            <th>Tên phim</th>
+                            <th>Thể loại</th>
+                            <th>Thời lượng</th>
+                            <th>Ngày khởi chiếu</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for movie in movies %}
+                        <tr>
+                            <td>
+                                {% if movie.poster and movie.poster.url %}
+                                    <img src="{{ movie.poster.url }}" alt="{{ movie.title }}" class="movie-avatar">
+                                {% else %}
+                                    <div class="movie-avatar d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-film fa-2x text-secondary"></i>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td class="fw-semibold">{{ movie.title }}</td>
+                            <td>{{ movie.genre }}</td>
+                            <td>{{ movie.duration }} phút</td>
+                            <td>{{ movie.release_date|date:'d/m/Y' }}</td>
+                            <td>
+                                <span class="badge-status {% if movie.status == 'now_showing' %}active{% else %}inactive{% endif %}">
+                                    {% if movie.status == 'now_showing' %}Đang chiếu{% elif movie.status == 'coming_soon' %}Sắp chiếu{% else %}Ngừng chiếu{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-info me-1" onclick="editMovie({{ movie.id }})"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-secondary me-1" onclick="toggleMovieStatus({{ movie.id }})"><i class="fas fa-power-off"></i></button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteMovie({{ movie.id }})"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -159,6 +163,30 @@
                         <label>Poster Image</label>
                         <input type="file" class="form-control" name="poster" accept="image/*" required>
                     </div>
+                    <div class="form-group mt-3">
+                        <label>Director</label>
+                        <input type="text" class="form-control" name="director" required>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Actor</label>
+                        <input type="text" class="form-control" name="actor">
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Language</label>
+                        <input type="text" class="form-control" name="language">
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Trailer URL</label>
+                        <input type="url" class="form-control" name="trailer_url">
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Status</label>
+                        <select class="form-control" name="status">
+                            <option value="coming_soon">Sắp chiếu</option>
+                            <option value="now_showing">Đang chiếu</option>
+                            <option value="archived">Ngừng chiếu</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -171,15 +199,14 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
 <script>
     function editMovie(movieId) {
-        // Update URL to use management prefix
         window.location.href = `/management/movies/${movieId}/edit/`;
     }
-
     function toggleMovieStatus(movieId) {
-        if (confirm('Are you sure you want to change the status of this movie?')) {
+        if (confirm('Bạn có chắc muốn thay đổi trạng thái phim này?')) {
             fetch(`/management/movies/${movieId}/toggle-status/`, {
                 method: 'POST',
                 headers: {
@@ -191,14 +218,13 @@
                 if (data.success) {
                     window.location.reload();
                 } else {
-                    alert('Failed to update movie status');
+                    alert('Cập nhật trạng thái phim thất bại');
                 }
             });
         }
     }
-
     function deleteMovie(movieId) {
-        if (confirm('Are you sure you want to delete this movie? This action cannot be undone.')) {
+        if (confirm('Bạn có chắc muốn xóa phim này?')) {
             fetch(`/management/movies/${movieId}/delete/`, {
                 method: 'POST',
                 headers: {
@@ -210,7 +236,7 @@
                 if (data.success) {
                     window.location.reload();
                 } else {
-                    alert('Failed to delete movie');
+                    alert('Xóa phim thất bại');
                 }
             });
         }

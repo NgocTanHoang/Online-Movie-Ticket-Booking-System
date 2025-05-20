@@ -1,0 +1,112 @@
+[
+    {
+        "model": "tickets.seat",
+        "pk": 1,
+        "fields": {
+            "room": 1,
+            "row": 1,
+            "column": 1,
+            "seat_type": 1,
+            "active": true
+        }
+    },
+    {
+        "model": "tickets.seat",
+        "pk": 2,
+        "fields": {
+            "room": 1,
+            "row": 1,
+            "column": 2,
+            "seat_type": 1,
+            "active": true
+        }
+    },
+    {
+        "model": "tickets.seat",
+        "pk": 3,
+        "fields": {
+            "room": 1,
+            "row": 1,
+            "column": 3,
+            "seat_type": 1,
+            "active": true
+        }
+    },
+    {
+        "model": "tickets.seat",
+        "pk": 4,
+        "fields": {
+            "room": 1,
+            "row": 1,
+            "column": 4,
+            "seat_type": 1,
+            "active": true
+        }
+    },
+    {
+        "model": "tickets.seat",
+        "pk": 5,
+        "fields": {
+            "room": 1,
+            "row": 1,
+            "column": 5,
+            "seat_type": 1,
+            "active": true
+        }
+    },
+    {
+        "model": "tickets.seat",
+        "pk": 6,
+        "fields": {
+            "room": 1,
+            "row": 1,
+            "column": 6,
+            "seat_type": 1,
+            "active": true
+        }
+    },
+    {
+        "model": "tickets.seat",
+        "pk": 7,
+        "fields": {
+            "room": 1,
+            "row": 1,
+            "column": 7,
+            "seat_type": 1,
+            "active": true
+        }
+    },
+    {
+        "model": "tickets.seat",
+        "pk": 8,
+        "fields": {
+            "room": 1,
+            "row": 1,
+            "column": 8,
+            "seat_type": 1,
+            "active": true
+        }
+    },
+    {
+        "model": "tickets.seat",
+        "pk": 9,
+        "fields": {
+            "room": 1,
+            "row": 1,
+            "column": 9,
+            "seat_type": 1,
+            "active": true
+        }
+    },
+    {
+        "model": "tickets.seat",
+        "pk": 10,
+        "fields": {
+            "room": 1,
+            "row": 1,
+            "column": 10,
+            "seat_type": 1,
+            "active": true
+        }
+    }
+] 
