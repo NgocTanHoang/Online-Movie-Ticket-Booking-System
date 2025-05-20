@@ -1,0 +1,387 @@
+[
+    {
+        "model": "tickets.room",
+        "pk": 1,
+        "fields": {
+            "theater": 1,
+            "room_number": "1",
+            "total_seats": 100,
+            "rows": 10,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 2,
+        "fields": {
+            "theater": 1,
+            "room_number": "2",
+            "total_seats": 120,
+            "rows": 12,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 3,
+        "fields": {
+            "theater": 1,
+            "room_number": "3",
+            "total_seats": 80,
+            "rows": 8,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 4,
+        "fields": {
+            "theater": 1,
+            "room_number": "4",
+            "total_seats": 150,
+            "rows": 15,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 5,
+        "fields": {
+            "theater": 2,
+            "room_number": "1",
+            "total_seats": 100,
+            "rows": 10,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 6,
+        "fields": {
+            "theater": 2,
+            "room_number": "2",
+            "total_seats": 120,
+            "rows": 12,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 7,
+        "fields": {
+            "theater": 2,
+            "room_number": "3",
+            "total_seats": 80,
+            "rows": 8,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 8,
+        "fields": {
+            "theater": 3,
+            "room_number": "1",
+            "total_seats": 100,
+            "rows": 10,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 9,
+        "fields": {
+            "theater": 3,
+            "room_number": "2",
+            "total_seats": 120,
+            "rows": 12,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 10,
+        "fields": {
+            "theater": 3,
+            "room_number": "3",
+            "total_seats": 80,
+            "rows": 8,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 11,
+        "fields": {
+            "theater": 3,
+            "room_number": "4",
+            "total_seats": 150,
+            "rows": 15,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 12,
+        "fields": {
+            "theater": 4,
+            "room_number": "1",
+            "total_seats": 100,
+            "rows": 10,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 13,
+        "fields": {
+            "theater": 4,
+            "room_number": "2",
+            "total_seats": 120,
+            "rows": 12,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 14,
+        "fields": {
+            "theater": 4,
+            "room_number": "3",
+            "total_seats": 80,
+            "rows": 8,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 15,
+        "fields": {
+            "theater": 5,
+            "room_number": "1",
+            "total_seats": 100,
+            "rows": 10,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 16,
+        "fields": {
+            "theater": 5,
+            "room_number": "2",
+            "total_seats": 120,
+            "rows": 12,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 17,
+        "fields": {
+            "theater": 5,
+            "room_number": "3",
+            "total_seats": 80,
+            "rows": 8,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 18,
+        "fields": {
+            "theater": 5,
+            "room_number": "4",
+            "total_seats": 150,
+            "rows": 15,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 19,
+        "fields": {
+            "theater": 6,
+            "room_number": "1",
+            "total_seats": 100,
+            "rows": 10,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 20,
+        "fields": {
+            "theater": 6,
+            "room_number": "2",
+            "total_seats": 120,
+            "rows": 12,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 21,
+        "fields": {
+            "theater": 6,
+            "room_number": "3",
+            "total_seats": 80,
+            "rows": 8,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 22,
+        "fields": {
+            "theater": 7,
+            "room_number": "1",
+            "total_seats": 100,
+            "rows": 10,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 23,
+        "fields": {
+            "theater": 7,
+            "room_number": "2",
+            "total_seats": 120,
+            "rows": 12,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 24,
+        "fields": {
+            "theater": 7,
+            "room_number": "3",
+            "total_seats": 80,
+            "rows": 8,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 25,
+        "fields": {
+            "theater": 7,
+            "room_number": "4",
+            "total_seats": 150,
+            "rows": 15,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 26,
+        "fields": {
+            "theater": 8,
+            "room_number": "1",
+            "total_seats": 100,
+            "rows": 10,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 27,
+        "fields": {
+            "theater": 8,
+            "room_number": "2",
+            "total_seats": 120,
+            "rows": 12,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 28,
+        "fields": {
+            "theater": 8,
+            "room_number": "3",
+            "total_seats": 80,
+            "rows": 8,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 29,
+        "fields": {
+            "theater": 9,
+            "room_number": "1",
+            "total_seats": 100,
+            "rows": 10,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 30,
+        "fields": {
+            "theater": 9,
+            "room_number": "2",
+            "total_seats": 120,
+            "rows": 12,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 31,
+        "fields": {
+            "theater": 9,
+            "room_number": "3",
+            "total_seats": 80,
+            "rows": 8,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 32,
+        "fields": {
+            "theater": 10,
+            "room_number": "1",
+            "total_seats": 100,
+            "rows": 10,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 33,
+        "fields": {
+            "theater": 10,
+            "room_number": "2",
+            "total_seats": 120,
+            "rows": 12,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 34,
+        "fields": {
+            "theater": 10,
+            "room_number": "3",
+            "total_seats": 80,
+            "rows": 8,
+            "columns": 10
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 35,
+        "fields": {
+            "theater": 10,
+            "room_number": "4",
+            "total_seats": 150,
+            "rows": 15,
+            "columns": 10
+        }
+    }
+] 

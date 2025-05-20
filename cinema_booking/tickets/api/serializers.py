@@ -56,20 +56,16 @@ class SeatSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']
 
 class ShowtimeSerializer(serializers.ModelSerializer):
-    movie = MovieSerializer(read_only=True)
-    room = RoomSerializer(read_only=True)
-    movie_id = serializers.PrimaryKeyRelatedField(
-        queryset=Movie.objects.all(), source='movie', write_only=True
-    )
-    room_id = serializers.PrimaryKeyRelatedField(
-        queryset=Room.objects.all(), source='room', write_only=True
-    )
-
+    movie = serializers.PrimaryKeyRelatedField(queryset=Movie.objects.all())
+    room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all())
+    is_active = serializers.SerializerMethodField()
+    
     class Meta:
         model = Showtime
-        fields = ['id', 'movie', 'movie_id', 'room', 'room_id', 'show_date',
-                 'start_time', 'end_time', 'price', 'reserved_seats']
-        read_only_fields = ['id', 'end_time']
+        fields = ['id', 'movie', 'room', 'show_date', 'start_time', 'end_time', 'price', 'is_active']
+        
+    def get_is_active(self, obj):
+        return obj.is_active
 
 class TicketSerializer(serializers.ModelSerializer):
     showtime_id = serializers.PrimaryKeyRelatedField(

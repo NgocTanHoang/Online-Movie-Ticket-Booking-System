@@ -19,4 +19,8 @@ urlpatterns = [
     path('showtimes/<int:pk>/', views.api_showtime_detail, name='api_showtime_detail'),
     path('theaters/<int:theater_id>/rooms/', views.api_theater_rooms, name='api_theater_rooms'),
     path('theaters/', views.get_theaters_api, name='get_theaters_api'),
+    path('showtimes/filter/', views.filter_showtimes, name='filter_showtimes'),
+    path('showtimes/', views.create_showtime, name='create_showtime'),
+    path('showtimes/<int:pk>/', views.update_showtime, name='update_showtime'),
+    path('showtimes/<int:pk>/delete/', views.delete_showtime, name='delete_showtime'),
 ]

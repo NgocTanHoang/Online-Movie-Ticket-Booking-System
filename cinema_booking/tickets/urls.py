@@ -4,7 +4,9 @@ from .views import (home_view, auth_view, logout_view, movies_view, about_view,
                    ticket_view, ticket_booking_view, seat_sel_view, movie_detail,
                    select_theater, admin_dashboard, admin_movies, admin_theaters,
                    admin_users, admin_promotions, admin_reports, admin_content,
-                   manage_showtimes, create_ticket, update_transaction, theater_info)
+                   manage_showtimes, create_ticket, update_transaction, theater_info,
+                   showtime_management, edit_movie, add_movie, delete_movie,
+                   toggle_movie_status)
 
 urlpatterns = [
     path('logout/', logout_view, name='logout'),
@@ -24,11 +26,16 @@ urlpatterns = [
     path('management/reports/', admin_reports, name='admin_reports'),
     path('management/content/', admin_content, name='admin_content'),
     path('management/showtimes/', manage_showtimes, name='manage_showtimes'),
+    path('management/showtimes/', showtime_management, name='showtime_management'),
     path('api/', include('tickets.api.urls')),
     path('api/tickets/create/', create_ticket, name='create_ticket'),
     path('api/tickets/update-transaction/', update_transaction, name='update_transaction'),
     path('theater-info/', theater_info, name='theater_info'),
     path('theater-info/<int:theater_id>/', theater_info, name='theater_info'),
+    path('management/movies/<int:movie_id>/edit/', edit_movie, name='edit_movie'),
+    path('management/movies/add/', add_movie, name='add_movie'),
+    path('management/movies/<int:movie_id>/delete/', delete_movie, name='delete_movie'),
+    path('management/movies/<int:movie_id>/toggle-status/', toggle_movie_status, name='toggle_movie_status'),
     path('', home_view, name='home'),
 ]
     

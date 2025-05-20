@@ -1,0 +1,102 @@
+[
+    {
+        "model": "tickets.theater",
+        "pk": 1,
+        "fields": {
+            "name": "CGV Vincom Center",
+            "address": "72 Lê Thánh Tôn, Bến Nghé, Quận 1, TP.HCM",
+            "phone": "028 3822 3333",
+            "status": "active"
+        }
+    },
+    {
+        "model": "tickets.theater",
+        "pk": 2,
+        "fields": {
+            "name": "CGV Crescent Mall",
+            "address": "101 Tôn Dật Tiên, Tân Phú, Quận 7, TP.HCM",
+            "phone": "028 5412 3333",
+            "status": "active"
+        }
+    },
+    {
+        "model": "tickets.theater",
+        "pk": 3,
+        "fields": {
+            "name": "CGV Aeon Mall Bình Tân",
+            "address": "30 Bờ Bao Tân Thắng, Sơn Kỳ, Tân Phú, TP.HCM",
+            "phone": "028 6262 3333",
+            "status": "active"
+        }
+    },
+    {
+        "model": "tickets.theater",
+        "pk": 4,
+        "fields": {
+            "name": "CGV Pandora City",
+            "address": "1/1 Trường Chinh, Tân Thới Hiệp, Quận 12, TP.HCM",
+            "phone": "028 6253 3333",
+            "status": "active"
+        }
+    },
+    {
+        "model": "tickets.theater",
+        "pk": 5,
+        "fields": {
+            "name": "CGV Aeon Mall Hà Đông",
+            "address": "Dương Nội, Hà Đông, Hà Nội",
+            "phone": "024 3200 3333",
+            "status": "active"
+        }
+    },
+    {
+        "model": "tickets.theater",
+        "pk": 6,
+        "fields": {
+            "name": "CGV Royal City",
+            "address": "72A Nguyễn Trãi, Thanh Xuân, Hà Nội",
+            "phone": "024 3200 3333",
+            "status": "active"
+        }
+    },
+    {
+        "model": "tickets.theater",
+        "pk": 7,
+        "fields": {
+            "name": "CGV Vincom Times City",
+            "address": "458 Minh Khai, Hai Bà Trưng, Hà Nội",
+            "phone": "024 3200 3333",
+            "status": "active"
+        }
+    },
+    {
+        "model": "tickets.theater",
+        "pk": 8,
+        "fields": {
+            "name": "CGV Vincom Đà Nẵng",
+            "address": "910 Ngô Quyền, Sơn Trà, Đà Nẵng",
+            "phone": "0236 3200 3333",
+            "status": "active"
+        }
+    },
+    {
+        "model": "tickets.theater",
+        "pk": 9,
+        "fields": {
+            "name": "CGV Vincom Hải Phòng",
+            "address": "Lê Thánh Tông, Ngô Quyền, Hải Phòng",
+            "phone": "0225 3200 3333",
+            "status": "active"
+        }
+    },
+    {
+        "model": "tickets.theater",
+        "pk": 10,
+        "fields": {
+            "name": "CGV Vincom Cần Thơ",
+            "address": "209 Đường 30/4, Xuân Khánh, Ninh Kiều, Cần Thơ",
+            "phone": "0292 3200 3333",
+            "status": "active"
+        }
+    }
+] 

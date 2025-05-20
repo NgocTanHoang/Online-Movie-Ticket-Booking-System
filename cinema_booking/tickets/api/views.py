@@ -612,3 +612,52 @@ def update_transaction(request):
         return JsonResponse({'error': 'Transaction not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+@api_view(['GET'])
+def filter_showtimes(request):
+    movie_id = request.GET.get('movie')
+    theater_id = request.GET.get('theater')
+    date = request.GET.get('date')
+    
+    showtimes = Showtime.objects.all()
+    
+    if movie_id:
+        showtimes = showtimes.filter(movie_id=movie_id)
+    if theater_id:
+        showtimes = showtimes.filter(room__theater_id=theater_id)
+    if date:
+        showtimes = showtimes.filter(show_date=date)
+        
+    showtimes = showtimes.select_related('movie', 'room', 'room__theater')
+    serializer = ShowtimeSerializer(showtimes, many=True)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+def create_showtime(request):
+    serializer = ShowtimeSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'success': True, 'data': serializer.data})
+    return Response({'success': False, 'message': serializer.errors})
+
+@api_view(['PUT'])
+def update_showtime(request, pk):
+    try:
+        showtime = Showtime.objects.get(pk=pk)
+    except Showtime.DoesNotExist:
+        return Response({'success': False, 'message': 'Không tìm thấy lịch chiếu'})
+        
+    serializer = ShowtimeSerializer(showtime, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'success': True, 'data': serializer.data})
+    return Response({'success': False, 'message': serializer.errors})
+
+@api_view(['DELETE'])
+def delete_showtime(request, pk):
+    try:
+        showtime = Showtime.objects.get(pk=pk)
+        showtime.delete()
+        return Response({'success': True})
+    except Showtime.DoesNotExist:
+        return Response({'success': False, 'message': 'Không tìm thấy lịch chiếu'})
