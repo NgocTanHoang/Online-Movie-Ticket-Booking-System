@@ -1,0 +1,109 @@
+[
+    {
+        "model": "tickets.movie",
+        "pk": 1,
+        "fields": {
+            "title": "Dune: Part Two",
+            "description": "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.",
+            "genre": "Sci-Fi",
+            "director": "Denis Villeneuve",
+            "duration": 166,
+            "poster_url": "https://image.tmdb.org/t/p/w500/d5NXSklXo0qyIYkgF94XAgMIckC.jpg",
+            "trailer_url": "https://www.youtube.com/watch?v=Way9Dexny3w",
+            "release_date": "2024-03-01",
+            "language": "English",
+            "actor": "Timothée Chalamet, Zendaya, Rebecca Ferguson"
+        }
+    },
+    {
+        "model": "tickets.movie",
+        "pk": 2,
+        "fields": {
+            "title": "Kung Fu Panda 4",
+            "description": "Po must train a new warrior when he's chosen to become the spiritual leader of the Valley of Peace.",
+            "genre": "Animation",
+            "director": "Mike Mitchell",
+            "duration": 94,
+            "poster_url": "https://image.tmdb.org/t/p/w500/kpZvJsTUBk1P0Vf8Nk9Lx8YlzZ.jpg",
+            "trailer_url": "https://www.youtube.com/watch?v=_inKs4eeHiI",
+            "release_date": "2024-03-08",
+            "language": "English",
+            "actor": "Jack Black, Awkwafina, Viola Davis"
+        }
+    },
+    {
+        "model": "tickets.theater",
+        "pk": 1,
+        "fields": {
+            "name": "CGV Vincom Center",
+            "address": "72 Lê Thánh Tôn, Bến Nghé, Quận 1, TP.HCM",
+            "phone": "028 3822 3333"
+        }
+    },
+    {
+        "model": "tickets.seattype",
+        "pk": 1,
+        "fields": {
+            "name": "Standard",
+            "price_multiplier": 1.0,
+            "description": "Standard seating"
+        }
+    },
+    {
+        "model": "tickets.seattype",
+        "pk": 2,
+        "fields": {
+            "name": "VIP",
+            "price_multiplier": 1.5,
+            "description": "VIP seating with extra legroom"
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 1,
+        "fields": {
+            "room_number": "A1",
+            "total_seats": 100,
+            "rows": 10,
+            "columns": 10,
+            "theater": 1
+        }
+    },
+    {
+        "model": "tickets.room",
+        "pk": 2,
+        "fields": {
+            "room_number": "A2",
+            "total_seats": 90,
+            "rows": 9,
+            "columns": 10,
+            "theater": 1
+        }
+    },
+    {
+        "model": "tickets.showtime",
+        "pk": 1,
+        "fields": {
+            "movie": 1,
+            "room": 1,
+            "show_date": "2024-04-20",
+            "start_time": "10:00:00",
+            "end_time": "12:46:00",
+            "price": 100000,
+            "reserved_seats": []
+        }
+    },
+    {
+        "model": "tickets.showtime",
+        "pk": 2,
+        "fields": {
+            "movie": 2,
+            "room": 2,
+            "show_date": "2024-04-20",
+            "start_time": "14:00:00",
+            "end_time": "15:34:00",
+            "price": 100000,
+            "reserved_seats": []
+        }
+    }
+] 

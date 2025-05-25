@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Quản lý rạp | FimTikit Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Inherit admin layout styles */
+    .admin-content {
+        padding-top: 80px;
+        min-height: calc(100vh - 100px);
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-content">
+    <div class="container-fluid py-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary">Danh sách rạp chiếu</h6>
+                        <button class="btn btn-primary" data-toggle="modal" data-target="#addTheaterModal">
+                            <i class="fas fa-plus mr-2"></i>Thêm rạp mới
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Tên rạp</th>
+                                        <th>Địa chỉ</th>
+                                        <th>Số phòng</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for theater in theaters %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="{{ theater.image_url }}" alt="{{ theater.name }}" class="rounded mr-3" style="width: 48px; height: 48px; object-fit: cover;">
+                                                <div>
+                                                    <div class="font-weight-bold">{{ theater.name }}</div>
+                                                    <small class="text-muted">{{ theater.phone }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ theater.address }}</td>
+                                        <td>{{ theater.rooms.count }}</td>
+                                        <td>
+                                            {% if theater.is_active %}
+                                            <span class="badge badge-success">Đang hoạt động</span>
+                                            {% else %}
+                                            <span class="badge badge-secondary">Tạm ngưng</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info mr-1" title="Chỉnh sửa">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-warning mr-1" title="Quản lý phòng">
+                                                <i class="fas fa-door-open"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" title="Xóa">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Theater Modal -->
+<div class="modal fade" id="addTheaterModal" tabindex="-1" role="dialog" aria-labelledby="addTheaterModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTheaterModalLabel">Thêm rạp mới</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="addTheaterForm" method="POST" action="{% url 'admin_theaters' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="name">Tên rạp</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Địa chỉ</label>
+                        <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="num_screens">Số phòng chiếu</label>
+                        <input type="number" class="form-control" id="num_screens" name="num_screens" min="1" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Thêm rạp</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Theater Modal -->
+<div class="modal fade" id="editTheaterModal" tabindex="-1" role="dialog" aria-labelledby="editTheaterModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editTheaterModalLabel">Chỉnh sửa rạp</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="editTheaterForm" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="theater_id" id="edit_theater_id">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="edit_name">Tên rạp</label>
+                        <input type="text" class="form-control" id="edit_name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_address">Địa chỉ</label>
+                        <textarea class="form-control" id="edit_address" name="address" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Theater Modal -->
+<div class="modal fade" id="deleteTheaterModal" tabindex="-1" role="dialog" aria-labelledby="deleteTheaterModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteTheaterModalLabel">Xác nhận xóa</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa rạp <strong id="deleteTheaterName"></strong>?</p>
+                <p class="text-danger">Lưu ý: Hành động này không thể hoàn tác!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Edit theater
+    $('.edit-theater').click(function() {
+        const id = $(this).data('id');
+        const name = $(this).data('name');
+        const address = $(this).data('address');
+        
+        $('#edit_theater_id').val(id);
+        $('#edit_name').val(name);
+        $('#edit_address').val(address);
+        
+        $('#editTheaterForm').attr('action', `/management/theaters/${id}/edit/`);
+    });
+
+    let theaterToDelete = null;
+
+    // Delete theater click handler
+    $('.delete-theater').click(function() {
+        const id = $(this).data('id');
+        const name = $(this).data('name');
+        
+        // Store the theater ID for deletion
+        theaterToDelete = id;
+        
+        // Update modal content
+        $('#deleteTheaterName').text(name);
+        
+        // Show modal
+        $('#deleteTheaterModal').modal('show');
+    });
+
+    // Confirm delete handler
+    $('#confirmDelete').click(function() {
+        if (theaterToDelete) {
+            $.ajax({
+                url: `/management/theaters/${theaterToDelete}/delete/`,
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Hide modal
+                        $('#deleteTheaterModal').modal('hide');
+                        // Reload page
+                        location.reload();
+                    } else {
+                        alert('Không thể xóa rạp. Vui lòng thử lại.');
+                    }
+                },
+                error: function() {
+                    alert('Đã xảy ra lỗi. Vui lòng thử lại.');
+                }
+            });
+        }
+    });
+
+    // Reset theaterToDelete when modal is closed
+    $('#deleteTheaterModal').on('hidden.bs.modal', function() {
+        theaterToDelete = null;
+    });
+});
+</script>
+{% endblock %} 

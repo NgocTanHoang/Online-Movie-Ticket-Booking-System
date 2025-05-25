@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Quản lý phòng chiếu | FimTikit Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-content {
+        padding-top: 80px;
+        min-height: calc(100vh - 100px);
+        background-color: #f8f9fa;
+    }
+    .room-card {
+        border: 1px solid #e3e6f0;
+        border-radius: 0.35rem;
+        transition: all 0.3s ease;
+    }
+    .room-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+    .room-type {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        z-index: 1;
+    }
+    .seat-map {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.25rem;
+    }
+    .screen {
+        background: #e9ecef;
+        height: 30px;
+        border-radius: 50%;
+        margin-bottom: 2rem;
+        position: relative;
+        text-align: center;
+        line-height: 30px;
+        color: #6c757d;
+    }
+    .screen::before {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 100%;
+        height: 10px;
+        background: linear-gradient(transparent, rgba(0,0,0,0.1));
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-content">
+    <div class="container-fluid py-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="m-0 font-weight-bold text-primary">Phòng chiếu - {{ theater.name }}</h6>
+                            <small class="text-muted">{{ theater.address }}</small>
+                        </div>
+                        <button class="btn btn-primary" data-toggle="modal" data-target="#addRoomModal">
+                            <i class="fas fa-plus mr-2"></i>Thêm phòng mới
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            {% for room in rooms %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card room-card">
+                    <div class="room-type">
+                        <span class="badge badge-info">{{ room.type }}</span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title d-flex justify-content-between align-items-center">
+                            <span>{{ room.name }}</span>
+                            <small class="text-muted">{{ room.capacity }} ghế</small>
+                        </h5>
+                        <div class="seat-map mb-3">
+                            <div class="screen">Màn hình</div>
+                            <!-- Seat map visualization will be added here -->
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge badge-light mr-2">
+                                    <i class="fas fa-couch mr-1"></i>{{ room.rows }} hàng
+                                </span>
+                                <span class="badge badge-light">
+                                    <i class="fas fa-arrows-alt-h mr-1"></i>{{ room.seats_per_row }} cột
+                                </span>
+                            </div>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-info" title="Chỉnh sửa">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-warning" title="Sơ đồ ghế">
+                                    <i class="fas fa-th"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

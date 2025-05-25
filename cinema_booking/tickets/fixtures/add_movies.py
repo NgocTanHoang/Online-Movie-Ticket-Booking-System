@@ -1,0 +1,124 @@
+import requests
+import json
+
+# API endpoint
+BASE_URL = "http://127.0.0.1:8000/api"
+
+# Movies data
+movies_data = [
+    {
+        "title": "Địa Đạo: Mặt Trời Trong Bóng Tối",
+        "description": "Phim điện ảnh đề tài kháng chiến \"Địa Đạo: Mặt Trời Trong Bóng Tối\" của đạo diễn Bùi Thạc Chuyên dự kiến ra rạp sớm từ 04/04/2025, hướng đến kỷ niệm 50 năm thống nhất đất nước.",
+        "genre": "Lịch sử, Hành động",
+        "director": "Bùi Thạc Chuyên",
+        "duration": 128,
+        "poster_url": "https://files.betacorp.vn/media%2fimages%2f2025%2f03%2f31%2f400x633%2D24%2D165808%2D310325%2D29.jpg",
+        "trailer_url": "https://www.youtube.com/embed/ErgN3ehlbj4?rel=0&showinfo=0&autoplay=1",
+        "release_date": "2025-04-04",
+        "language": "Tiếng Việt",
+        "actor": "Thái Hòa; Quang Tuấn; Diễm Hằng Lamoon; Anh Tú Wilson; Hồ Thu Anh; Uyển Ân"
+    },
+    {
+        "title": "Cưới Ma Giải Hạn",
+        "description": "Menn, một tên trộm cắp đang làm tay trong cho cảnh sát, đồng thời cũng là một gã trai thẳng chính hiệu. Ngày nọ, Menn vô tình nhặt được một bao lì xì đỏ bí ẩn và bị ràng buộc bởi khế ước siêu nhiên, bắt anh phải kết hôn với một hồn ma.",
+        "genre": "Hài hước",
+        "director": "Chayanop Boonprakob",
+        "duration": 128,
+        "poster_url": "https://files.betacorp.vn/media%2fimages%2f2025%2f04%2f09%2f400x633%2D25%2D142655%2D090425%2D72.jpg",
+        "trailer_url": "https://www.youtube.com/embed/uxlsw0IIIeg?rel=0&showinfo=0&autoplay=1",
+        "release_date": "2025-04-11",
+        "language": "Tiếng Việt",
+        "actor": "Putthipong Assaratanakul, Krit Amnuaydechkorn, Arachaporn Pokinpakorn"
+    },
+    {
+        "title": "Tìm Xác: Ma Không Đầu",
+        "description": "Bộ đôi Tiến Luật và Ngô Kiến Huy, với nghề nghiệp \"độc lạ\" hốt xác và lái xe cứu thương, hứa hẹn mang đến những tràng cười không ngớt cho khán giả qua hành trình tìm xác có một không hai trên màn ảnh Việt.",
+        "genre": "Kinh dị, Hài hước",
+        "director": "Tiến Luật; Ngô Kiến Huy; NSND Hồng Vân; NSƯT Hữu Châu; NSƯT Đại Nghĩa, Thanh Hương, Hoàng Mèo, Nghệ sĩ Phi Phụng, Phan Vũ.",
+        "duration": 119,
+        "poster_url": "https://files.betacorp.vn/media%2fimages%2f2025%2f04%2f09%2fimage001%2D112444%2D090425%2D25.jpg",
+        "trailer_url": "https://www.youtube.com/embed/0sdwVSeJrbU?rel=0&showinfo=0&autoplay=1",
+        "release_date": "2025-04-18",
+        "language": "Tiếng Việt",
+        "actor": "Bùi Văn Hải"
+    },
+    {
+        "title": "Âm Dương Lộ",
+        "description": "Vì mưu sinh, một cử nhân thất nghiệp lén cha chở một thi thể nữ về Tây Nguyên ngay giữa đêm khuya. Trên hành trình, anh buộc phải đối mặt với một thế giới siêu nhiên đầy rẫy vong linh.",
+        "genre": "Hài hước, Kinh dị",
+        "director": "Hoàng Tuấn Cường",
+        "duration": 119,
+        "poster_url": "https://files.betacorp.vn/media%2fimages%2f2025%2f03%2f20%2f400x633%2D111048%2D200325%2D89.png",
+        "trailer_url": "https://www.youtube.com/embed/VJcEikcfDXM?rel=0&showinfo=0&autoplay=1",
+        "release_date": "2025-03-28",
+        "language": "Tiếng Việt",
+        "actor": "Bạch Công Khanh; Lan Thy; Minh Hoàng; Tuấn Dũng; Đại Nghĩa; Hạnh Thúy"
+    },
+    {
+        "title": "Một Bộ Phim Minecraft",
+        "description": "Chào mừng bạn đến với thế giới của Minecraft, nơi sự sáng tạo không chỉ giúp bạn chế tạo mà còn là yếu tố quan trọng để sống sót!",
+        "genre": "Hành động, Phiêu lưu",
+        "director": "Jared Hess",
+        "duration": 101,
+        "poster_url": "https://files.betacorp.vn/media%2fimages%2f2025%2f03%2f27%2fposter%2Dminecraft%2D1%2D111444%2D270325%2D61.jpg",
+        "trailer_url": "https://www.youtube.com/embed/O1f6L1Pqu28?rel=0&showinfo=0&autoplay=1",
+        "release_date": "2025-04-04",
+        "language": "Tiếng Anh",
+        "actor": "Jason Momoa, Jack Black, Emma Myers, Sebastian Eugene Hansen, Danielle Brooks"
+    },
+    {
+        "title": "Nghề Siêu Khó Nói",
+        "description": "Bộ phim kể về Danbi, một người có ước mơ trở thành nhà văn viết sách thiếu nhi nhưng thực chất lại là lính mới trong đội chống nạn khiêu dâm bất hợp pháp.",
+        "genre": "Hài hước, Tình cảm",
+        "director": "Jong-suk Lee",
+        "duration": 102,
+        "poster_url": "https://files.betacorp.vn/media%2fimages%2f2025%2f03%2f14%2fff%2Dmain%2Dposter%2D400x633px%2D151317%2D140325%2D48.jpg",
+        "trailer_url": "https://www.youtube.com/embed/8EqTrhd9qC8?rel=0&showinfo=0&autoplay=1",
+        "release_date": "2025-03-21",
+        "language": "Tiếng Hàn",
+        "actor": "Sung Dong-il, Park Ji-hyun, Choi Siwon"
+    },
+    {
+        "title": "Oán Linh Nhập Xác",
+        "description": "Oán Linh Nhập Xác xoay quanh hành trình đầy bí ẩn của hai chị em gái Hanif và Isti trong căn nhà ma quái.",
+        "genre": "Kinh dị",
+        "director": "Upi Avianto",
+        "duration": 95,
+        "poster_url": "https://files.betacorp.vn/media%2fimages%2f2025%2f04%2f01%2f400wx633h%2D131833%2D010425%2D94.jpg",
+        "trailer_url": "https://www.youtube.com/embed/yS_AgXZeBpw?rel=0&showinfo=0&autoplay=1",
+        "release_date": "2025-04-04",
+        "language": "Tiếng Indo",
+        "actor": "Hana Malasan, Yasamin Jasem, Egy Fedly"
+    },
+    {
+        "title": "Pororo: Thám Hiểm Đại Dương Xanh",
+        "description": "Gặp gỡ Pororo và những người bạn trong chuyến phiêu lưu thám hiểm đại dương cùng vô vàn những điều kỳ bí và những bài học bổ ích về biển xanh dành cho các bạn nhỏ.",
+        "genre": "Hoạt hình, Phiêu lưu",
+        "director": "Kim Hyunho, Yoon Jewan",
+        "duration": 71,
+        "poster_url": "https://files.betacorp.vn/media%2fimages%2f2025%2f03%2f28%2f400x633%2D114754%2D280325%2D84.jpg",
+        "trailer_url": "https://www.youtube.com/embed/N31_KNij30k?rel=0&showinfo=0&autoplay=1",
+        "release_date": "2025-04-04",
+        "language": "Tiếng Việt",
+        "actor": ""
+    }
+]
+
+def add_movies():
+    # Add movies
+    response = requests.post(
+        f"{BASE_URL}/movies/bulk_create/",
+        json=movies_data,
+        headers={"Content-Type": "application/json"}
+    )
+    
+    if response.status_code == 201:
+        print("Successfully added movies")
+        print(response.json())
+    else:
+        print("Failed to add movies")
+        print(response.status_code)
+        print(response.text)
+
+if __name__ == "__main__":
+    add_movies() 

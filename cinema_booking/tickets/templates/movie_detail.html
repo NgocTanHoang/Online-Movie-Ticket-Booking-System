@@ -1,0 +1,356 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ movie.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .selected-theater {
+        margin-left: 15px;
+        border-left: 1px solid rgba(255,255,255,0.1);
+        padding-left: 15px;
+    }
+    .selected-theater a {
+        color: #000;
+        font-size: 0.9em;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        max-width: 300px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .selected-theater a:hover {
+        color: #ff4e8c;
+    }
+    .selected-theater .fa-map-marker {
+        font-size: 1.2em;
+        color: #000;
+    }
+    .selected-theater .fa-chevron-down {
+        font-size: 0.8em;
+        margin-left: 5px;
+        color: #000;
+    }
+
+    /* Movie Poster */
+    .movie-poster img {
+        width: 100%;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        margin-top: 70px;
+    }
+
+    /* Movie Title */
+    .movie-title {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #333;
+        margin-top: 100px;
+        margin-left: 40px;
+    }
+
+    .movie-subtitle {
+        font-size: 1.2rem;
+    }
+
+    /* Meta Thông tin */
+    .movie-meta {
+        font-size: 1rem;
+        color: #555;
+        margin-left: 40px;
+    }
+
+    .movie-meta .badge {
+        font-size: 1rem;
+        padding: 5px 10px;
+    }
+
+    /* Movie Details */
+    .movie-details p {
+        font-size: 1rem;
+        margin-bottom: 5px;
+        padding-left: 50px;
+        margin-left: 10px;
+    }
+
+    .movie-details strong {
+        color: #dc3545;
+    }
+
+    /* Nút Đặt Vé */
+    .btn-danger {
+        background-color: #e50914;
+        border-color: #e50914;
+        font-size: 1.2rem;
+        padding: 10px 50px;
+        margin-left: 70px;
+        border-radius: 5px;
+        transition: 0.3s;
+    }
+
+    .btn-danger:hover {
+        background-color: #b20710;
+        border-color: #b20710;
+    }
+
+    /* Nội dung phim */
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #333;
+        border-left: 5px solid #e50914;
+        padding-left: 10px;
+        margin-bottom: 20px;
+    }
+
+    .movie-description {
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+
+    /* Trailer */
+    .embed-responsive {
+        max-width: 800px;
+        margin: 0 auto;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    /* Lịch chiếu */
+    .showtime-filter {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .showtime-filter select,
+    .showtime-filter input {
+        font-size: 1rem;
+        padding: 8px;
+    }
+
+    .showtime-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .showtime-item {
+        background: white;
+        border: 1px solid #ddd;
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .time-slots a {
+        font-size: 0.9rem;
+        padding: 6px 12px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .movie-title {
+            font-size: 1.8rem;
+        }
+
+        .btn-danger {
+            font-size: 1rem;
+            padding: 8px 16px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+        }
+
+        .embed-responsive {
+            max-width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Theater Selection Modal -->
+<div class="modal fade" id="theaterModal" tabindex="-1" role="dialog" aria-labelledby="theaterModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="theaterModalLabel">Chọn rạp chiếu</h5>
+                {% if request.session.selected_theater %}
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                {% endif %}
+            </div>
+            <div class="modal-body">
+                <form id="theaterSelectForm" method="post" action="{% url 'select_theater' %}">
+                    {% csrf_token %}
+                    <div class="form-group mb-4">
+                        <label for="province">Tỉnh/ Thành phố:</label>
+                        <select class="form-control" id="province" name="province" required>
+                            <option value="">Chọn Tỉnh/ Thành phố</option>
+                            {% regroup theaters by get_province as province_list %}
+                            {% for province in province_list %}
+                            <option value="{{ province.grouper }}">{{ province.grouper }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label for="theater">Tên rạp:</label>
+                        <select class="form-control" id="theater" name="theater" required>
+                            <option value="">Chọn rạp</option>
+                            {% for theater in theaters %}
+                            <option value="{{ theater.id }}" data-province="{{ theater.get_province }}" style="display: none;">{{ theater.name|truncatechars:25 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Xác nhận</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<section class="movie-detail-section py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Movie Poster -->
+            <div class="col-lg-4 col-md-5">
+                <div class="movie-poster">
+                    <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" class="img-fluid rounded shadow">
+                </div>
+            </div>
+
+            <!-- Movie Info -->
+            <div class="col-lg-8 col-md-7">
+                <h1 class="movie-title">{{ movie.title }}</h1>
+                <p class="movie-subtitle text-muted">{{ movie.original_title }}</p>
+
+                <div class="movie-meta mb-3">
+                    <span class="badge badge-warning">{{ movie.rating }}</span>
+                    <span class="ml-2">{{ movie.duration }} phút</span>
+                    <span class="ml-2">| {{ movie.release_date|date:"d/m/Y" }}</span>
+                </div>
+
+                <div class="movie-details">
+                    <p><strong>Đạo diễn:</strong> {{ movie.director }}</p>
+                    <p><strong>Diễn viên:</strong> {{ movie.actor }}</p>
+                    <p><strong>Thể loại:</strong> {{ movie.genre }}</p>
+                    <p><strong>Ngôn ngữ:</strong> {{ movie.language }}</p>
+                </div>
+
+                <!-- Selected Theater Info -->
+                {% if selected_theater %}
+                <div class="selected-theater-info mt-3 mb-3">
+                    <p style="display: none;"><strong>Rạp đã chọn:</strong> {{ selected_theater.name }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Booking Button -->
+                <button type="button" class="btn btn-danger btn-lg mt-3" onclick="goToBooking()">
+                    <i class="fa fa-ticket-alt mr-2"></i>Đặt vé ngay
+                </button>
+            </div>
+        </div>
+
+        <!-- Movie Description -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3 class="section-title">Nội dung phim</h3>
+                <p class="movie-description">{{ movie.description|linebreaks }}</p>
+            </div>
+        </div>
+
+        <!-- Trailer -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3 class="section-title">Trailer</h3>
+                <div class="embed-responsive embed-responsive-16by9">
+                    <iframe class="embed-responsive-item" src="{{ movie.trailer_url }}" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function goToBooking() {
+        const movieId = "{{ movie.id }}";
+        {% if request.session.selected_theater %}
+            const theaterId = "{{ request.session.selected_theater }}";
+            window.location.href = `/ticketbooking/${theaterId}/${movieId}/`;
+        {% else %}
+            alert("Vui lòng chọn rạp chiếu trước khi đặt vé");
+            $('#theaterModal').modal('show');
+        {% endif %}
+    }
+</script>
+<script>
+    $(document).ready(function() {
+        // Show modal when clicking on selected theater
+        $('#changeTheater').click(function(e) {
+            e.preventDefault();
+            $('#theaterModal').modal('show');
+        });
+
+        // Province selection handler
+        $('#province').change(function() {
+            const selectedProvince = $(this).val();
+            const theaterSelect = $('#theater');
+            
+            theaterSelect.find('option').each(function() {
+                if (!$(this).val()) {
+                    $(this).show();  // Always show the default option
+                    return;
+                }
+                
+                if ($(this).data('province') === selectedProvince) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+            
+            // Reset theater selection
+            theaterSelect.val('');
+        });
+
+        // Form submission handler
+        $('#theaterSelectForm').on('submit', function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        $('#theaterModal').modal('hide');
+                        location.reload();
+                    }
+                }
+            });
+        });
+
+        // Trailer play button click handler
+        $('.play-button').click(function() {
+            const iframe = $(this).closest('.embed-responsive').find('iframe');
+            const poster = $(this).closest('.trailer-poster');
+            
+            // Show iframe and hide poster
+            iframe.show();
+            poster.hide();
+            
+            // Add autoplay parameter to iframe src
+            const src = iframe.attr('src');
+            if (!src.includes('autoplay=1')) {
+                iframe.attr('src', src + (src.includes('?') ? '&' : '?') + 'autoplay=0');
+            }
+        });
+    });
+</script>
+{% endblock %}

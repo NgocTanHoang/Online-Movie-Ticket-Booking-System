@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Quản lý người dùng{% endblock %}
+{% block content %}
+<div class="container py-4" style="margin-top: 60px;">
+    <h2 class="mb-4">Quản lý người dùng</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="thead-light">
+                <tr>
+                    <th>#</th>
+                    <th>Tên đăng nhập</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>Ngày tạo</th>
+                    <th>Admin?</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.get_full_name|default:'-' }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.date_joined|date:'d/m/Y H:i' }}</td>
+                    <td>{% if user.is_staff %}<span class="badge badge-success">✔</span>{% else %}<span class="badge badge-secondary">✖</span>{% endif %}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center">Không có người dùng nào.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %} 

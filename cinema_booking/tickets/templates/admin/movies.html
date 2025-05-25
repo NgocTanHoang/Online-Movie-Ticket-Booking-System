@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Quản lý phim | FimTikit{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container-movie {
+        margin-top: 90px;
+        margin-bottom: 40px;
+    }
+    .movie-table th, .movie-table td {
+        vertical-align: middle;
+    }
+    .movie-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    .movie-avatar {
+        width: 60px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        background: #f1f1f1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .badge-status {
+        font-size: 0.95em;
+        padding: 0.5em 1.2em;
+        border-radius: 1em;
+        font-weight: 500;
+        white-space: nowrap;
+        min-width: 110px;
+        text-align: center;
+        display: inline-block;
+    }
+    .badge-status.active {
+        background: #28a745;
+        color: #fff;
+    }
+    .badge-status.inactive {
+        background: #6c757d;
+        color: #fff;
+    }
+    .btn-add-movie {
+        border-radius: 2em;
+        font-weight: 600;
+        padding: 0.6em 1.5em;
+        font-size: 1.1em;
+        box-shadow: 0 2px 8px rgba(0,123,255,0.08);
+    }
+    .table-responsive {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container container-movie">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary mb-0">Quản lý phim</h2>
+        <button type="button" class="btn btn-primary btn-add-movie" data-toggle="modal" data-target="#addMovieModal">
+            <i class="fas fa-plus me-2"></i> Thêm phim mới
+        </button>
+    </div>
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 movie-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Poster</th>
+                            <th>Tên phim</th>
+                            <th>Thể loại</th>
+                            <th>Thời lượng</th>
+                            <th>Ngày khởi chiếu</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for movie in movies %}
+                        <tr>
+                            <td>
+                                <div class="d-flex px-3 py-1">
+                                    <div>
+                                        <img src="{{ movie.poster_url }}" class="avatar me-3" alt="{{ movie.title }}" style="width:32px; height:48px; object-fit:cover; border-radius:4px;">
+                                    </div>
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <h6 class="mb-0 text-sm">{{ movie.title }}</h6>
+                                        <p class="text-xs text-secondary mb-0">{{ movie.genre }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="fw-semibold">{{ movie.title }}</td>
+                            <td>{{ movie.genre }}</td>
+                            <td>{{ movie.duration }} phút</td>
+                            <td>{{ movie.release_date|date:'d/m/Y' }}</td>
+                            <td>
+                                <span class="badge-status {% if movie.status == 'now_showing' %}active{% else %}inactive{% endif %}">
+                                    {% if movie.status == 'now_showing' %}Đang chiếu{% elif movie.status == 'coming_soon' %}Sắp chiếu{% else %}Ngừng chiếu{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-info me-1" onclick="editMovie({{ movie.id }})"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-secondary me-1" onclick="toggleMovieStatus({{ movie.id }})"><i class="fas fa-power-off"></i></button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteMovie({{ movie.id }})"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Movie Modal -->
+<div class="modal fade" id="addMovieModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Movie</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addMovieForm" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Title</label>
+                                <input type="text" class="form-control" name="title" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Genre</label>
+                                <input type="text" class="form-control" name="genre" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Duration (minutes)</label>
+                                <input type="number" class="form-control" name="duration" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Release Date</label>
+                                <input type="date" class="form-control" name="release_date" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Description</label>
+                        <textarea class="form-control" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Poster Image</label>
+                        <input type="file" class="form-control" name="poster" accept="image/*" required>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Director</label>
+                        <input type="text" class="form-control" name="director" required>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Actor</label>
+                        <input type="text" class="form-control" name="actor">
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Language</label>
+                        <input type="text" class="form-control" name="language">
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Trailer URL</label>
+                        <input type="url" class="form-control" name="trailer_url">
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Status</label>
+                        <select class="form-control" name="status">
+                            <option value="coming_soon">Sắp chiếu</option>
+                            <option value="now_showing">Đang chiếu</option>
+                            <option value="archived">Ngừng chiếu</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Movie</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+<script>
+    function editMovie(movieId) {
+        window.location.href = `/management/movies/${movieId}/edit/`;
+    }
+    function toggleMovieStatus(movieId) {
+        if (confirm('Bạn có chắc muốn thay đổi trạng thái phim này?')) {
+            fetch(`/management/movies/${movieId}/toggle-status/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Cập nhật trạng thái phim thất bại');
+                }
+            });
+        }
+    }
+    function deleteMovie(movieId) {
+        if (confirm('Bạn có chắc muốn xóa phim này?')) {
+            fetch(`/management/movies/${movieId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Xóa phim thất bại');
+                }
+            });
+        }
+    }
+
+    document.getElementById('addMovieForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        
+        fetch('/management/movies/add/', {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('Failed to add movie: ' + data.error);
+            }
+        });
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chỉnh sửa phim | FimTikit{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-movie-container {
+        max-width: 700px;
+        margin: 100px auto 40px auto;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+        padding: 32px 28px 24px 28px;
+    }
+    .edit-movie-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #007bff;
+        margin-bottom: 24px;
+        text-align: center;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #333;
+    }
+    .form-control, .form-select {
+        border-radius: 8px;
+        font-size: 1.05em;
+        padding: 10px 14px;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.15rem rgba(0,123,255,.12);
+    }
+    .btn-save {
+        border-radius: 2em;
+        font-weight: 600;
+        padding: 0.6em 2em;
+        font-size: 1.1em;
+    }
+    .movie-poster-preview {
+        width: 100px;
+        height: 140px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        background: #f1f1f1;
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="position: absolute; right: 32px; top: 32px; z-index: 10;">
+  <a href="{% url 'admin_movies' %}" class="btn-close" aria-label="Close"></a>
+</div>
+<div class="edit-movie-container">
+    <div class="edit-movie-title">Thông tin phim</div>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label">Tên phim</label>
+            <input type="text" class="form-control" name="title" value="{{ movie.title }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Thể loại</label>
+            <input type="text" class="form-control" name="genre" value="{{ movie.genre }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Đạo diễn</label>
+            <input type="text" class="form-control" name="director" value="{{ movie.director }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Diễn viên</label>
+            <input type="text" class="form-control" name="actor" value="{{ movie.actor }}">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Thời lượng (phút)</label>
+            <input type="number" class="form-control" name="duration" value="{{ movie.duration }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Ngày khởi chiếu</label>
+            <input type="date" class="form-control" name="release_date" value="{{ movie.release_date|date:'Y-m-d' }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Ngôn ngữ</label>
+            <input type="text" class="form-control" name="language" value="{{ movie.language }}">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Mô tả</label>
+            <textarea class="form-control" name="description" rows="3" required>{{ movie.description }}</textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Poster hiện tại</label><br>
+            {% if movie.poster and movie.poster.url %}
+                <img src="{{ movie.poster.url }}" alt="Poster" class="movie-poster-preview">
+            {% else %}
+                <div class="movie-poster-preview d-flex align-items-center justify-content-center">
+                    <i class="fas fa-film fa-2x text-secondary"></i>
+                </div>
+            {% endif %}
+            <input type="file" class="form-control mt-2" name="poster" accept="image/*">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Trailer URL</label>
+            <input type="url" class="form-control" name="trailer_url" value="{{ movie.trailer_url }}">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Trạng thái</label>
+            <select class="form-select" name="status">
+                <option value="coming_soon" {% if movie.status == 'coming_soon' %}selected{% endif %}>Sắp chiếu</option>
+                <option value="now_showing" {% if movie.status == 'now_showing' %}selected{% endif %}>Đang chiếu</option>
+                <option value="archived" {% if movie.status == 'archived' %}selected{% endif %}>Ngừng chiếu</option>
+            </select>
+        </div>
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary btn-save"><i class="fas fa-save me-2"></i>Lưu thay đổi</button>
+            <a href="{% url 'admin_movies' %}" class="btn btn-secondary ms-2">Hủy</a>
+        </div>
+    </form>
+</div>
+{% endblock %} 

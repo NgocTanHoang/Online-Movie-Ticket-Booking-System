@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Đăng nhập / Đăng ký - FimTikit{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/as-alert-message.min.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/sign-in.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+    /* Override base template styles for login page */
+    #site-header {
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 1000;
+        background-color: var(--theme-bg);
+    }
+    footer {
+        display: none;
+    }
+    .w3l-breadcrumb {
+        display: none;
+    }
+    body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 160px 15px 80px;
+        background: #f7f7f7;
+    }
+    .container_signup_signin {
+        margin: 0 auto;
+    }
+</style>
+{% endblock %}
+
+{% block header %}
+<header id="site-header" class="w3l-header fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <img src="{% static 'images/fimtikit.png' %}" alt="FimTikit" title="FimTikit" style="height:35px;" />
+                <span>FimTikit</span>
+            </a>
+            <button class="navbar-toggler collapsed" type="button" data-toggle="collapse"
+                data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="fa icon-expand fa-bars"></span>
+                <span class="fa icon-close fa-times"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">Trang Chủ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'movies' %}">Phim</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'about' %}">Giới Thiệu</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Liên Hệ</a>
+                    </li>
+                    {% if user.is_authenticated and user.is_staff %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin_dashboard' %}">Quản lí</a>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <div class="search-right">
+                    <a href="#search" class="btn search-hny mr-lg-3 mt-lg-0 mt-4" title="search">
+                        Tìm kiếm <span class="fa fa-search ml-3" aria-hidden="true"></span>
+                    </a>
+                    <!-- search popup -->
+                    <div id="search" class="pop-overlay">
+                        <div class="popup">
+                            <form action="#" method="post" class="search-box">
+                                <input type="search" placeholder="Tìm kiếm phim..." name="search" required="required"
+                                    autofocus="">
+                                <button type="submit" class="btn"><span class="fa fa-search" aria-hidden="true"></span></button>
+                            </form>
+                            <div class="browse-items">
+                                <h3 class="hny-title two mt-md-5 mt-4">Duyệt qua tất cả:</h3>
+                                <ul class="search-items">
+                                    <li><a href="{% url 'movies' %}">Hành Động</a></li>
+                                    <li><a href="{% url 'movies' %}">Kịch</a></li>
+                                    <li><a href="{% url 'movies' %}">Gia Đình</a></li>
+                                    <li><a href="{% url 'movies' %}">Hài</a></li>
+                                    <li><a href="{% url 'movies' %}">Lãng Mạn</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <a class="close" href="#close">×</a>
+                    </div>
+                    <!-- /search popup -->
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+	<div class="wrapper">
+		<div class="container_signup_signin" id="container_signup_signin">
+			<div class="form-container sign-up-container">
+				<form name="sign-up-form" method="post" action="{% url 'login' %}" onsubmit="return signUpValidateForm()">
+					{% csrf_token %}
+					<input type="hidden" name="form_type" value="signup">
+					<h1>Tạo tài khoản</h1>
+					<div class="social-container">
+						<a href="#" class="social"><i class="fab fa-facebook-f"></i></a>
+						<a href="#" class="social"><i class="fab fa-google"></i></a>
+						<a href="#" class="social"><i class="fab fa-github"></i></a>
+					</div>
+					<span>hoặc sử dụng email của bạn</span>
+					<input name="sign-up-name" type="text" placeholder="Họ và tên" required/>
+					<input name="sign-up-email" type="email" placeholder="Email" required/>
+					<input name="sign-up-passwd" type="password" placeholder="Mật khẩu" required/>
+					<input name="sign-up-passwd2" type="password" placeholder="Xác nhận mật khẩu" required/>
+					<button type="submit">Đăng ký</button>
+				</form>
+			</div>
+			<div class="form-container sign-in-container">
+				<form name="sign-in-form" method="post" style="color: var(--theme-title);" action="{% url 'login' %}" onsubmit="return signInValidateForm()">
+					<input type="hidden" name="form_type" value="login">
+					{% csrf_token %}
+					<h1>Đăng nhập</h1>
+					<div class="social-container">
+						<a href="#" class="social" style="color: var(--theme-title);"><i class="fab fa-facebook-f"></i></a>
+						<a href="#" class="social" style="color: var(--theme-title);"><i class="fab fa-google"></i></a>
+						<a href="#" class="social" style="color: var(--theme-title);"><i class="fab fa-github"></i></a>
+					</div>
+					<span>hoặc sử dụng tài khoản của bạn</span>
+					<input name="sign-in-email" type="email" placeholder="Email" required/>
+					<input name="sign-in-passwd" type="password" placeholder="Mật khẩu" required/>
+					<a href="#">Quên mật khẩu?</a>
+					<button type="submit">Đăng nhập</button>
+				</form>
+			</div>
+			<div class="overlay-container">
+				<div class="overlay">
+					<div class="overlay-panel overlay-left">
+						<h1>Chào mừng trở lại!</h1>
+						<p>Để tiếp tục kết nối với chúng tôi, vui lòng đăng nhập với thông tin của bạn</p>
+						<button class="ghost" id="signIn">Đăng nhập</button>
+					</div>
+					<div class="overlay-panel overlay-right">
+						<h1>Xin chào!</h1>
+						<p>Đăng ký tài khoản và đặt vé xem phim ngay!</p>
+						<button class="ghost" id="signUp">Đăng ký</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- Hidden messages container -->
+		<div id="django-messages" data-messages='{{ messages|safe }}' style="display: none;">
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript" src="{% static 'js/as-alert-message.min.js'%}"></script>
+<script>
+	const signUpButton = document.getElementById('signUp');
+	const signInButton = document.getElementById('signIn');
+	const container = document.getElementById('container_signup_signin');
+
+	signUpButton.addEventListener('click', () => {
+		container.classList.add("right-panel-active");
+	});
+
+	signInButton.addEventListener('click', () => {
+		container.classList.remove("right-panel-active");
+	});
+
+	document.addEventListener("DOMContentLoaded", function () {
+		var messagesContainer = document.getElementById("django-messages");
+		if (messagesContainer) {
+			var messagesData = messagesContainer.getAttribute("data-messages");
+			try {
+				var djangoMessages = JSON.parse(messagesData || '[]');
+				djangoMessages.forEach(msg => {
+					asAlertMsg({
+						message: msg.message,
+						type: msg.level === 'error' ? 'error' : (msg.level === 'warning' ? 'warning' : 'success'),
+						position: "top-right",
+						timer: 5000
+					});
+				});
+			} catch (e) {
+				console.error("Error parsing Django messages:", e);
+			}
+		}
+	});
+
+	function signUpValidateForm() {
+		var password = document.forms["sign-up-form"]["sign-up-passwd"].value;
+		var confirmPassword = document.forms["sign-up-form"]["sign-up-passwd2"].value;
+		
+		if (password !== confirmPassword) {
+			asAlertMsg({
+				type: "error",
+				message: "Mật khẩu xác nhận không khớp!",
+				position: "top-right"
+			});
+			return false;
+		}
+		
+		if (password.length < 8) {
+			asAlertMsg({
+				type: "error",
+				message: "Mật khẩu phải có ít nhất 8 ký tự!",
+				position: "top-right"
+			});
+			return false;
+		}
+		
+		return true;
+	}
+
+	function signInValidateForm() {
+		return true;
+	}
+</script>
+{% endblock %}

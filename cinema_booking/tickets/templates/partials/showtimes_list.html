@@ -1,0 +1,28 @@
+{% if showtimes_by_room %}
+    {% for room, showtimes in showtimes_by_room.items %}
+    <li class="time-li" id="room-{{ room.id }}">
+        <div class="screens">Phòng {{ room.room_number }}</div>
+        <div class="time-btn">
+            {% for showtime in showtimes %}
+            <button type="button" 
+                    class="screen-time {% if showtime.id|stringformat:'s' == selected_showtime_id %}selected{% endif %}" 
+                    id="showtime-{{ showtime.id }}"
+                    onclick="selectShowtime('{{ showtime.id }}')"
+                    {% if showtime.is_full %}disabled{% endif %}>
+                {{ showtime.start_time|time:"H:i" }}
+                {% if showtime.is_full %}
+                <span class="badge badge-danger">Hết chỗ</span>
+                {% endif %}
+            </button>
+            {% endfor %}
+        </div>
+    </li>
+    {% endfor %}
+{% else %}
+    <li class="time-li">
+        <div class="screens">Không có suất chiếu nào cho ngày {{ selected_date|date:"d/m/Y" }}</div>
+        <div class="time-btn">
+            <button class="screen-time" disabled>Không có suất chiếu</button>
+        </div>
+    </li>
+{% endif %} 
